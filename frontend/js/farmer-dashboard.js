@@ -1,5 +1,5 @@
 // Farmer dashboard behaviour: metrics, recent orders, store and order modal
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = 'https://waste2wealth-8rio.onrender.com/api';
 let token = localStorage.getItem('token');
 let currentUser = JSON.parse(localStorage.getItem('user') || 'null');
 

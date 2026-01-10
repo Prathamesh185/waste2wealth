@@ -1,5 +1,5 @@
 // API Base URL
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = 'https://waste2wealth-8rio.onrender.com/api';
 
 console.log('Auth.js loaded successfully');
 
