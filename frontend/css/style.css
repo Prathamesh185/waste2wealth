@@ -1043,7 +1043,7 @@ body {
     .hero-content,
     .impact-content {
         grid-template-columns: 1fr;
-        gap: 0px;
+        gap: 40px;
     }
 
     .features-grid {
@@ -1624,4 +1624,36 @@ body {
     max-width: 400px;
 }
 
+
+@media (max-width: 480px) {
+    .impact-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Show heading first */
+    .impact-text .section-badge {
+        order: 1;
+    }
+
+    .impact-text .section-title {
+        order: 2;
+    }
+
+    /* Move image immediately after heading */
+    .impact-image {
+        order: 3;
+        margin: 12px 0; /* spacing */
+    }
+
+    /* Paragraph comes after image */
+    .impact-text .section-description {
+        order: 4;
+    }
+
+    /* Keep cards after paragraph */
+    .impact-cards {
+        order: 5;
+    }
+}
 
