@@ -1,0 +1,2135 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-green: #00A63E;
+    --light-green: #dcfce7;
+    --light-gray: #f3f4f6;
+    --dark-gray: #1f2937;
+    --gray: #6b7280;
+    --white: #ffffff;
+    --border-radius: 12px;
+    --transition: all 0.3s ease;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: #f9fafb;
+    color: var(--dark-gray);
+    line-height: 1.6;
+}
+
+/* Navigation Bar */
+.navbar {
+    background: var(--white);
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    padding: 0;
+}
+
+.nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 70px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--dark-gray);
+}
+
+.logo svg {
+    width: 32px;
+    height: 32px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 8px;
+    list-style: none;
+}
+
+.nav-link {
+    padding: 8px 16px;
+    text-decoration: none;
+    color: var(--gray);
+    font-weight: 500;
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+.nav-link:hover,
+.nav-link.active {
+    background: var(--light-green);
+    color: var(--primary-green);
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.points-display {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: var(--light-green);
+    border-radius: 20px;
+    font-weight: 600;
+    color: var(--primary-green);
+}
+
+.notification-icon,
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.notification-icon {
+    background: var(--light-gray);
+    color: var(--gray);
+}
+
+.notification-icon:hover {
+    background: var(--light-green);
+    color: var(--primary-green);
+}
+
+.user-avatar {
+    background: var(--primary-green);
+    color: var(--white);
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.logout-btn {
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid var(--gray);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--gray);
+    transition: var(--transition);
+}
+
+.logout-btn:hover {
+    background: var(--gray);
+    color: var(--white);
+}
+
+/* Sections */
+.section {
+    display: none;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+.section.active {
+    display: block;
+}
+
+/* Dashboard Section */
+.welcome-section {
+    margin-bottom: 32px;
+}
+
+.welcome-section h1 {
+    font-size: 42px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--dark-gray);
+}
+
+.welcome-section p {
+    font-size: 18px;
+    color: var(--gray);
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.metric-card {
+    background: var(--white);
+    padding: 24px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: var(--transition);
+}
+
+.metric-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.metric-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.metric-icon.gold {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.metric-icon.green {
+    background: var(--light-green);
+    color: var(--primary-green);
+}
+
+.metric-icon.blue {
+    background: #dbeafe;
+    color: #3b82f6;
+}
+
+.metric-icon.purple {
+    background: #e9d5ff;
+    color: #9333ea;
+}
+
+.metric-info {
+    flex: 1;
+}
+
+.metric-info h3 {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray);
+    margin-bottom: 4px;
+}
+
+.metric-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--dark-gray);
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 24px;
+}
+
+.content-card {
+    background: var(--white);
+    padding: 24px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+}
+
+.content-card h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--dark-gray);
+}
+
+.pickup-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid var(--light-gray);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    transition: var(--transition);
+}
+
+.pickup-item:hover {
+    background: var(--light-gray);
+}
+
+.pickup-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.pickup-icon.completed {
+    background: var(--light-green);
+    color: var(--primary-green);
+}
+
+.pickup-icon.processing {
+    background: #dbeafe;
+    color: #3b82f6;
+}
+
+.pickup-details {
+    flex: 1;
+}
+
+.pickup-description {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--dark-gray);
+}
+
+.pickup-meta {
+    font-size: 14px;
+    color: var(--gray);
+}
+
+.pickup-status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.pickup-status.completed {
+    background: var(--light-green);
+    color: var(--primary-green);
+}
+
+.pickup-status.processing {
+    background: #dbeafe;
+    color: #3b82f6;
+}
+
+.pickup-points {
+    color: var(--primary-green);
+    font-weight: 700;
+}
+
+.content-column {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.quick-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.action-btn {
+    width: 100%;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid var(--light-gray);
+    background: var(--white);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--dark-gray);
+    transition: var(--transition);
+}
+
+.action-btn:hover {
+    background: var(--light-gray);
+}
+
+.action-btn.primary {
+    background: var(--dark-gray);
+    color: var(--white);
+    border-color: var(--dark-gray);
+}
+
+.action-btn.primary:hover {
+    background: var(--gray);
+}
+
+.action-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.goal-item {
+    margin-bottom: 20px;
+}
+
+.goal-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.goal-label {
+    font-weight: 600;
+    color: var(--dark-gray);
+}
+
+.goal-progress {
+    font-size: 14px;
+    color: var(--gray);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--light-gray);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--primary-green);
+    transition: width 0.3s ease;
+}
+
+/* Request Pickup Section */
+.pickup-container {
+    max-width: 1200px;
+}
+
+.pickup-content {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 32px;
+}
+
+.pickup-form-wrapper h1 {
+    font-size: 36px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--dark-gray);
+}
+
+.subtitle {
+    font-size: 16px;
+    color: var(--gray);
+    margin-bottom: 32px;
+}
+
+.pickup-card {
+    background: var(--white);
+    padding: 32px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+}
+
+.pickup-card h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: var(--dark-gray);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--dark-gray);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    background: var(--light-gray);
+    transition: var(--transition);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    background: var(--white);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.date-input-wrapper {
+    position: relative;
+}
+
+.date-input-wrapper input {
+    padding-right: 40px;
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 14px 24px;
+    background: var(--primary-green);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-primary:hover {
+    background: #16a34a;
+}
+
+.pickup-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.sidebar-card {
+    background: var(--white);
+    padding: 24px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.card-header svg {
+    width: 20px;
+    height: 20px;
+    color: var(--primary-green);
+}
+
+.card-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--dark-gray);
+}
+
+.reward-estimate {
+    text-align: center;
+}
+
+.reward-estimate span {
+    display: block;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--primary-green);
+    margin-bottom: 8px;
+}
+
+.reward-estimate p {
+    font-size: 14px;
+    color: var(--gray);
+}
+
+.guidelines {
+    list-style: none;
+}
+
+.guidelines li {
+    padding: 8px 0;
+    padding-left: 24px;
+    position: relative;
+    font-size: 14px;
+    color: var(--gray);
+}
+
+.guidelines li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 16px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--primary-green);
+}
+
+.help-text {
+    font-size: 14px;
+    color: var(--gray);
+}
+
+/* Compost Store Section */
+.store-container {
+    background: var(--white);
+    padding: 48px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+}
+
+.store-container h1 {
+    font-size: 36px;
+    margin-bottom: 32px;
+}
+
+.store-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+}
+
+.info-card {
+    padding: 32px;
+    border: 2px solid var(--light-gray);
+    border-radius: var(--border-radius);
+}
+
+.info-card h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--gray);
+}
+
+.stock-amount,
+.stock-price {
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--primary-green);
+}
+
+/* Rewards Section */
+.rewards-container {
+    max-width: 1200px;
+}
+
+.rewards-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 32px;
+}
+
+.rewards-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.goal-card {
+    text-align: center;
+}
+
+.goal-card svg {
+    width: 40px;
+    height: 40px;
+    color: var(--primary-green);
+    margin-bottom: 12px;
+}
+
+.goal-card h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray);
+    margin-bottom: 8px;
+}
+
+.goal-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--dark-gray);
+    margin-bottom: 4px;
+}
+
+.goal-desc {
+    font-size: 14px;
+    color: var(--gray);
+    margin-bottom: 16px;
+}
+
+.goal-progress-container {
+    text-align: left;
+}
+
+.goal-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--light-gray);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.goal-progress-fill {
+    height: 100%;
+    background: var(--primary-green);
+}
+
+.goal-progress-container span {
+    font-size: 13px;
+    color: var(--gray);
+}
+
+.category-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.category-btn {
+    padding: 10px 16px;
+    border: none;
+    background: var(--light-gray);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    text-align: left;
+    transition: var(--transition);
+}
+
+.category-btn:hover,
+.category-btn.active {
+    background: var(--light-green);
+    color: var(--primary-green);
+}
+
+.rewards-main h1 {
+    font-size: 36px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--dark-gray);
+}
+
+.rewards-main p {
+    font-size: 16px;
+    color: var(--gray);
+    margin-bottom: 32px;
+}
+
+.rewards-tabs {
+    display: flex;
+    gap: 8px;
+    border-bottom: 2px solid var(--light-gray);
+    margin-bottom: 32px;
+}
+
+.tab-btn {
+    padding: 12px 24px;
+    border: none;
+    background: transparent;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--gray);
+    margin-bottom: -2px;
+    transition: var(--transition);
+}
+
+.tab-btn:hover,
+.tab-btn.active {
+    color: var(--primary-green);
+    border-bottom-color: var(--primary-green);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.rewards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.reward-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+
+.reward-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+}
+
+.reward-image {
+    width: 100%;
+    height: 200px;
+    background: var(--light-gray);
+    object-fit: cover;
+}
+
+.reward-content {
+    padding: 20px;
+}
+
+.reward-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.reward-badge.available {
+    background: var(--dark-gray);
+    color: var(--white);
+}
+
+.reward-badge.unavailable {
+    background: var(--light-gray);
+    color: var(--gray);
+}
+
+.reward-card h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--dark-gray);
+}
+
+.reward-card p {
+    font-size: 14px;
+    color: var(--gray);
+    margin-bottom: 12px;
+}
+
+.reward-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--gray);
+    margin-bottom: 8px;
+}
+
+.reward-info svg {
+    width: 16px;
+    height: 16px;
+}
+
+.reward-cost {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.reward-cost svg {
+    width: 20px;
+    height: 20px;
+    color: var(--primary-green);
+}
+
+.reward-cost span {
+    font-weight: 700;
+    color: var(--primary-green);
+}
+
+.reward-redeem-btn {
+    width: 100%;
+    padding: 10px;
+    background: var(--dark-gray);
+    color: var(--white);
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.reward-redeem-btn:hover {
+    background: var(--gray);
+}
+
+.reward-redeem-btn:disabled {
+    background: var(--light-gray);
+    color: var(--gray);
+    cursor: not-allowed;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 48px;
+    color: var(--gray);
+}
+
+/* Toast Notifications */
+.toast-container {
+    position: fixed;
+    top: 90px;
+    right: 24px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.toast {
+    background: var(--white);
+    padding: 16px 20px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 300px;
+    animation: slideIn 0.3s ease;
+}
+
+.toast.success {
+    border-left: 4px solid var(--primary-green);
+}
+
+.toast.error {
+    border-left: 4px solid #dc2626;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .content-grid,
+    .pickup-content,
+    .rewards-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .rewards-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .rewards-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-container {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 16px;
+    }
+    
+    .logo {
+        font-size: 18px;
+    }
+
+    .logo svg {
+        width: 28px;
+        height: 28px;
+    }
+
+    .nav-links {
+        order: 3;
+        width: 100%;
+        margin-top: 16px;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .nav-link {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+
+    .nav-actions {
+        gap: 12px;
+    }
+
+    .notification-icon,
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+    }
+
+    .points-display {
+        padding: 6px 10px;
+        font-size: 12px;
+        gap: 4px;
+    }
+
+    .logout-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    .section {
+        padding: 24px 16px;
+    }
+
+    .welcome-section h1 {
+        font-size: 32px;
+    }
+
+    .welcome-section p {
+        font-size: 16px;
+    }
+
+    .metrics-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .metric-card {
+        padding: 16px;
+        gap: 16px;
+    }
+
+    .metric-icon {
+        width: 48px;
+        height: 48px;
+    }
+
+    .metric-value {
+        font-size: 24px;
+    }
+
+    .metric-info h3 {
+        font-size: 13px;
+    }
+
+    .content-grid {
+        gap: 16px;
+    }
+
+    .content-card {
+        padding: 16px;
+    }
+
+    .content-card h2 {
+        font-size: 18px;
+    }
+
+    .pickup-item {
+        gap: 12px;
+        padding: 12px;
+    }
+
+    .pickup-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .pickup-description {
+        font-size: 13px;
+    }
+
+    .pickup-meta {
+        font-size: 12px;
+    }
+
+    .pickup-status {
+        padding: 3px 10px;
+        font-size: 11px;
+    }
+
+    .action-btn {
+        padding: 12px 16px;
+        font-size: 13px;
+        gap: 10px;
+    }
+
+    .action-btn svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .goal-label {
+        font-size: 13px;
+    }
+
+    .goal-progress {
+        font-size: 12px;
+    }
+
+    .progress-fill {
+        height: 6px;
+    }
+
+    .pickup-form-wrapper h1 {
+        font-size: 32px;
+    }
+
+    .subtitle {
+        font-size: 14px;
+    }
+
+    .pickup-card {
+        padding: 24px;
+    }
+
+    .pickup-card h3 {
+        font-size: 18px;
+    }
+
+    .form-group label {
+        font-size: 13px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .btn-primary {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+
+    .sidebar-card {
+        padding: 16px;
+    }
+
+    .card-header h3 {
+        font-size: 14px;
+    }
+
+    .reward-estimate span {
+        font-size: 28px;
+    }
+
+    .guidelines li {
+        padding-left: 20px;
+        font-size: 13px;
+    }
+
+    .guidelines li::before {
+        width: 6px;
+        height: 6px;
+    }
+
+    .store-info {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .rewards-main h1 {
+        font-size: 32px;
+    }
+
+    .rewards-main p {
+        font-size: 14px;
+    }
+
+    .rewards-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .reward-card h3 {
+        font-size: 16px;
+    }
+
+    .reward-card p {
+        font-size: 13px;
+    }
+
+    .reward-image {
+        height: 180px;
+    }
+
+    .category-btn {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+
+    .tab-btn {
+        padding: 10px 20px;
+        font-size: 13px;
+    }
+
+    .goal-card svg {
+        width: 36px;
+        height: 36px;
+    }
+
+    .goal-card h3 {
+        font-size: 12px;
+    }
+
+    .goal-title {
+        font-size: 16px;
+    }
+
+    .goal-desc {
+        font-size: 13px;
+    }
+
+    .toast-container {
+        top: 80px;
+        right: 16px;
+        left: 16px;
+    }
+
+    .toast {
+        min-width: unset;
+        width: 100%;
+    }
+
+    .achievement-card {
+        gap: 16px;
+        padding: 16px;
+    }
+
+    .achievement-icon {
+        font-size: 40px;
+    }
+
+    .achievement-content h3 {
+        font-size: 16px;
+    }
+
+    .achievement-content p {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 640px) {
+    .nav-container {
+        padding: 12px;
+        gap: 12px;
+    }
+
+    .logo {
+        font-size: 16px;
+    }
+
+    .logo svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .nav-links {
+        gap: 4px;
+    }
+
+    .nav-link {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+
+    .section {
+        padding: 16px 12px;
+    }
+
+    .welcome-section h1 {
+        font-size: 26px;
+        margin-bottom: 4px;
+    }
+
+    .welcome-section p {
+        font-size: 14px;
+    }
+
+    .metrics-grid {
+        gap: 12px;
+    }
+
+    .metric-card {
+        padding: 12px;
+        gap: 12px;
+        flex-direction: column;
+    }
+
+    .metric-icon {
+        width: 44px;
+        height: 44px;
+    }
+
+    .metric-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .metric-value {
+        font-size: 20px;
+    }
+
+    .metric-info h3 {
+        font-size: 12px;
+    }
+
+    .content-card {
+        padding: 12px;
+    }
+
+    .content-card h2 {
+        font-size: 16px;
+        margin-bottom: 16px;
+    }
+
+    .pickup-item {
+        gap: 10px;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .pickup-icon {
+        width: 38px;
+        height: 38px;
+    }
+
+    .pickup-description {
+        font-size: 12px;
+    }
+
+    .pickup-meta {
+        font-size: 11px;
+    }
+
+    .action-btn {
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+
+    .action-btn svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .goal-label {
+        font-size: 12px;
+    }
+
+    .goal-progress {
+        font-size: 11px;
+    }
+
+    .pickup-form-wrapper h1 {
+        font-size: 26px;
+    }
+
+    .subtitle {
+        font-size: 13px;
+    }
+
+    .pickup-card {
+        padding: 20px;
+    }
+
+    .pickup-card h3 {
+        font-size: 16px;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-group label {
+        font-size: 12px;
+        margin-bottom: 6px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    .btn-primary {
+        padding: 10px 16px;
+        font-size: 12px;
+    }
+
+    .sidebar-card {
+        padding: 12px;
+    }
+
+    .card-header h3 {
+        font-size: 13px;
+    }
+
+    .reward-estimate span {
+        font-size: 24px;
+    }
+
+    .reward-estimate p {
+        font-size: 12px;
+    }
+
+    .guidelines li {
+        padding-left: 18px;
+        font-size: 12px;
+    }
+
+    .help-text {
+        font-size: 12px;
+    }
+
+    .store-container {
+        padding: 32px 16px;
+    }
+
+    .store-container h1 {
+        font-size: 28px;
+    }
+
+    .info-card {
+        padding: 20px;
+    }
+
+    .info-card h2 {
+        font-size: 16px;
+    }
+
+    .stock-amount,
+    .stock-price {
+        font-size: 36px;
+    }
+
+    .rewards-main h1 {
+        font-size: 26px;
+    }
+
+    .rewards-main p {
+        font-size: 13px;
+    }
+
+    .rewards-grid {
+        gap: 16px;
+    }
+
+    .reward-card {
+        border-radius: 8px;
+    }
+
+    .reward-image {
+        height: 150px;
+    }
+
+    .reward-content {
+        padding: 16px;
+    }
+
+    .reward-card h3 {
+        font-size: 14px;
+    }
+
+    .reward-card p {
+        font-size: 12px;
+    }
+
+    .reward-badge {
+        font-size: 10px;
+    }
+
+    .reward-info {
+        font-size: 12px;
+    }
+
+    .reward-cost {
+        font-size: 12px;
+    }
+
+    .reward-cost span {
+        font-weight: 700;
+    }
+
+    .reward-redeem-btn {
+        padding: 8px;
+        font-size: 11px;
+    }
+
+    .category-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .tab-btn {
+        padding: 8px 16px;
+        font-size: 12px;
+    }
+
+    .goal-card {
+        padding: 12px;
+    }
+
+    .goal-card svg {
+        width: 32px;
+        height: 32px;
+        margin-bottom: 8px;
+    }
+
+    .goal-card h3 {
+        font-size: 11px;
+    }
+
+    .goal-title {
+        font-size: 14px;
+    }
+
+    .goal-desc {
+        font-size: 12px;
+        margin-bottom: 12px;
+    }
+
+    .goal-progress-bar {
+        height: 6px;
+    }
+
+    .goal-progress-container span {
+        font-size: 11px;
+    }
+
+    .toast-container {
+        top: 70px;
+        right: 12px;
+        left: 12px;
+    }
+
+    .toast {
+        padding: 12px 16px;
+        font-size: 12px;
+    }
+
+    .achievement-card {
+        gap: 12px;
+        padding: 12px;
+    }
+
+    .achievement-icon {
+        font-size: 36px;
+    }
+
+    .achievement-content h3 {
+        font-size: 14px;
+    }
+
+    .achievement-content p {
+        font-size: 11px;
+    }
+
+    .achievement-unlocked {
+        font-size: 11px;
+    }
+
+    .ai-section {
+        padding: 12px;
+    }
+
+    .ai-section input[type="file"] {
+        margin-bottom: 10px;
+        padding: 6px;
+    }
+
+    .history-section h2 {
+        font-size: 20px;
+        margin-bottom: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav-container {
+        padding: 10px;
+    }
+
+    .logo {
+        font-size: 14px;
+    }
+
+    .logo svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .notification-icon,
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+
+    .points-display {
+        padding: 4px 8px;
+        font-size: 10px;
+    }
+
+    .logout-btn {
+        padding: 4px 8px;
+        font-size: 10px;
+    }
+
+    .section {
+        padding: 12px 10px;
+    }
+
+    .welcome-section h1 {
+        font-size: 22px;
+    }
+
+    .welcome-section p {
+        font-size: 13px;
+    }
+
+    .metrics-grid {
+        gap: 10px;
+    }
+
+    .metric-card {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .metric-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .metric-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .metric-value {
+        font-size: 18px;
+    }
+
+    .metric-info h3 {
+        font-size: 11px;
+    }
+
+    .content-card {
+        padding: 10px;
+    }
+
+    .content-card h2 {
+        font-size: 14px;
+    }
+
+    .pickup-item {
+        gap: 8px;
+        padding: 8px;
+    }
+
+    .pickup-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .pickup-description {
+        font-size: 11px;
+    }
+
+    .pickup-meta {
+        font-size: 10px;
+    }
+
+    .action-btn {
+        padding: 8px 10px;
+        font-size: 11px;
+        gap: 8px;
+    }
+
+    .action-btn svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .goal-label {
+        font-size: 11px;
+    }
+
+    .goal-progress {
+        font-size: 10px;
+    }
+
+    .progress-bar {
+        height: 4px;
+    }
+
+    .progress-fill {
+        height: 4px;
+    }
+
+    .pickup-form-wrapper h1 {
+        font-size: 22px;
+    }
+
+    .subtitle {
+        font-size: 12px;
+    }
+
+    .pickup-card {
+        padding: 16px;
+    }
+
+    .pickup-card h3 {
+        font-size: 14px;
+        margin-bottom: 16px;
+    }
+
+    .form-group {
+        margin-bottom: 12px;
+    }
+
+    .form-group label {
+        font-size: 11px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+
+    .btn-primary {
+        padding: 8px 12px;
+        font-size: 11px;
+    }
+
+    .sidebar-card {
+        padding: 10px;
+    }
+
+    .card-header {
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .card-header svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .card-header h3 {
+        font-size: 12px;
+    }
+
+    .reward-estimate span {
+        font-size: 22px;
+    }
+
+    .reward-estimate p {
+        font-size: 11px;
+    }
+
+    .guidelines li {
+        padding-left: 16px;
+        font-size: 11px;
+        padding: 6px 0;
+    }
+
+    .guidelines li::before {
+        width: 4px;
+        height: 4px;
+        top: 14px;
+    }
+
+    .help-text {
+        font-size: 11px;
+    }
+
+    .store-container {
+        padding: 20px 10px;
+        border-radius: 8px;
+    }
+
+    .store-container h1 {
+        font-size: 22px;
+    }
+
+    .store-info {
+        gap: 16px;
+    }
+
+    .info-card {
+        padding: 16px;
+        border-radius: 8px;
+    }
+
+    .info-card h2 {
+        font-size: 14px;
+    }
+
+    .stock-amount,
+    .stock-price {
+        font-size: 28px;
+    }
+
+    .rewards-container {
+        max-width: 100%;
+    }
+
+    .rewards-main h1 {
+        font-size: 22px;
+    }
+
+    .rewards-main p {
+        font-size: 12px;
+        margin-bottom: 20px;
+    }
+
+    .rewards-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .reward-card {
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    .reward-image {
+        height: 120px;
+    }
+
+    .reward-content {
+        padding: 12px;
+    }
+
+    .reward-card h3 {
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+
+    .reward-card p {
+        font-size: 11px;
+    }
+
+    .reward-badge {
+        padding: 2px 6px;
+        font-size: 9px;
+        margin-bottom: 8px;
+    }
+
+    .reward-info {
+        font-size: 11px;
+        gap: 6px;
+    }
+
+    .reward-info svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .reward-cost {
+        gap: 6px;
+        margin-bottom: 12px;
+    }
+
+    .reward-cost svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .reward-cost span {
+        font-size: 11px;
+    }
+
+    .reward-redeem-btn {
+        padding: 6px;
+        font-size: 10px;
+    }
+
+    .category-btn {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+
+    .rewards-tabs {
+        gap: 4px;
+        margin-bottom: 20px;
+    }
+
+    .tab-btn {
+        padding: 6px 12px;
+        font-size: 11px;
+    }
+
+    .goal-card {
+        text-align: center;
+        padding: 8px;
+    }
+
+    .goal-card svg {
+        width: 28px;
+        height: 28px;
+        margin-bottom: 6px;
+    }
+
+    .goal-card h3 {
+        font-size: 10px;
+    }
+
+    .goal-title {
+        font-size: 12px;
+    }
+
+    .goal-desc {
+        font-size: 11px;
+        margin-bottom: 8px;
+    }
+
+    .goal-progress-container span {
+        font-size: 10px;
+    }
+
+    .toast-container {
+        top: 60px;
+        right: 10px;
+        left: 10px;
+    }
+
+    .toast {
+        padding: 10px 12px;
+        font-size: 10px;
+    }
+
+    .achievement-card {
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .achievement-icon {
+        font-size: 32px;
+    }
+
+    .achievement-content h3 {
+        font-size: 12px;
+    }
+
+    .achievement-content p {
+        font-size: 10px;
+    }
+
+    .achievement-progress {
+        margin-top: 8px;
+    }
+
+    .achievement-unlocked {
+        font-size: 10px;
+    }
+
+    .ai-section {
+        padding: 10px;
+    }
+
+    .ai-section input[type="file"] {
+        margin-bottom: 8px;
+        padding: 4px;
+        font-size: 11px;
+    }
+
+    .ai-section button {
+        margin-top: 6px;
+    }
+
+    .history-section {
+        margin-bottom: 32px;
+    }
+
+    .history-section h2 {
+        font-size: 18px;
+        margin-bottom: 12px;
+    }
+
+    #achievementsList,
+    #redemptionHistory {
+        gap: 12px;
+    }
+}
+
+/* AI Section */
+.ai-section {
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: var(--light-gray);
+}
+
+.ai-section input[type="file"] {
+    margin-bottom: 12px;
+    padding: 8px;
+    width: 100%;
+}
+
+.ai-section button {
+    margin-top: 8px;
+}
+
+/* History Section */
+.history-container {
+    max-width: 1000px;
+}
+
+.history-section {
+    margin-bottom: 48px;
+}
+
+.history-section h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: var(--dark-gray);
+}
+
+/* Achievement Cards */
+.achievement-card {
+    display: flex;
+    align-items: start;
+    gap: 20px;
+    padding: 24px;
+    background: var(--white);
+    border: 1px solid #e5e7eb;
+    border-radius: var(--border-radius);
+    margin-bottom: 16px;
+    transition: var(--transition);
+}
+
+.achievement-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.achievement-card.unlocked {
+    border-color: var(--primary-green);
+    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+}
+
+.achievement-icon {
+    font-size: 48px;
+    line-height: 1;
+}
+
+.achievement-content {
+    flex: 1;
+}
+
+.achievement-content h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--dark-gray);
+}
+
+.achievement-content p {
+    font-size: 14px;
+    color: var(--gray);
+    margin-bottom: 12px;
+}
+
+.achievement-progress {
+    margin-top: 12px;
+}
+
+.achievement-progress .progress-bar {
+    margin-bottom: 8px;
+}
+
+.achievement-progress span {
+    font-size: 13px;
+    color: var(--gray);
+}
+
+.achievement-unlocked {
+    color: var(--primary-green);
+    font-weight: 600;
+    margin-top: 8px;
+}
+
+#achievementsList,
+#redemptionHistory {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* AI Classification Results */
+.ai-result-card {
+  padding: 16px;
+  border-radius: 12px;
+  border: 2px solid;
+  margin-top: 12px;
+  animation: fadeIn 0.3s ease;
+}
+
+.ai-result-card.compostable {
+  background: #dcfce7;
+  border-color: #00A63E;
+}
+
+.ai-result-card.non-compostable {
+  background: #fee2e2;
+  border-color: #dc2626;
+}
+
+.ai-result-card.recyclable {
+  background: #dbeafe;
+  border-color: #3b82f6;
+}
+
+.ai-result-card.unknown {
+  background: #fef3c7;
+  border-color: #f59e0b;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Disabled Submit Button */
+button[type="submit"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}

@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard – Waste2Wealth</title>
+
+  <!-- ✅ LOAD LEAFLET CSS FIRST -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+
+  <!-- THEN load custom CSS -->
+  <link rel="stylesheet" href="css/admin-dashboard.css">
+
+  <!-- ✅ LOAD LEAFLET JS BEFORE CLOSING HEAD -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+
+</head>
+
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 32 32" fill="none">
+          <!-- Darker green circular background (updated color) -->
+          <circle cx="16" cy="16" r="15" fill="#00A63E"></circle>
+
+          <!-- White-edged leaf with padding (scaled and centered) -->
+          <g transform="translate(3,3) scale(0.82)">
+            <path d="M15 25A7 7 0 0 1 13.8 11.1C19.5 10 21 9.48 23 7c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" stroke="white"
+              stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+            <path d="M6 26c0-3 1.85-5.36 5.08-6C13.5 19.52 16 18 17 17" stroke="white" stroke-width="2.5"
+              stroke-linecap="round" str="" oke-linejoin="round" fill="none"></path>
+          </g>
+        </svg>
+        <span>Waste2Wealth</span>
+      </div>
+      <div class="nav-links">
+        <a href="#" class="nav-link active" data-section="dashboard">Dashboard</a>
+        <a href="#" class="nav-link" data-section="waste-collection">Waste Collection</a>
+        <a href="#" class="nav-link" data-section="orders">Orders</a>
+        <a href="#" class="nav-link" data-section="inventory">Inventory</a>
+        <a href="#" class="nav-link" data-section="rewards">Rewards</a>
+        <a href="#" class="nav-link" data-section="route-planning">Route Planning</a>
+      </div>
+      <div class="nav-actions">
+        <div class="user-avatar"><span id="userInitial">A</span></div>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container" style="padding-top:24px; padding-bottom:60px;">
+    <!-- Dashboard Overview -->
+    <section id="dashboard-section" class="section active">
+      <div class="welcome-section">
+        <h1 style="margin:0 0 6px 0">Welcome back, <span id="userName">Admin</span>!</h1>
+        <p style="margin:0;color:#6b7280;">Monitor pickups, orders, rewards and keep the marketplace running smoothly.
+        </p>
+      </div>
+
+      <div class="metrics-grid" style="margin-top:24px;">
+        <div class="metric-card compact">
+          <div class="metric-icon green">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path>
+              <path d="M15 18H9"></path>
+              <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"></path>
+              <circle cx="17" cy="18" r="2"></circle>
+              <circle cx="7" cy="18" r="2"></circle>
+            </svg>
+          </div>
+          <div>
+            <h3>Total Pickups</h3>
+            <p class="metric-value" id="metricTotalPickups">--</p>
+          </div>
+        </div>
+        <div class="metric-card compact">
+          <div class="metric-icon blue">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="8" cy="21" r="1"></circle>
+              <circle cx="19" cy="21" r="1"></circle>
+              <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+            </svg>
+          </div>
+          <div>
+            <h3>Active Orders</h3>
+            <p class="metric-value" id="metricActiveOrders">--</p>
+
+          </div>
+        </div>
+        <div class="metric-card compact">
+          <div class="metric-icon purple">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path
+                d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z">
+              </path>
+              <path d="m3.3 7 8.7 5 8.7-5"></path>
+              <path d="M12 22V12"></path>
+            </svg>
+          </div>
+          <div>
+            <h3>Compost Stock</h3>
+            <p class="metric-value"><span id="metricStockKg">--</span> kg</p>
+          </div>
+        </div>
+        <div class="metric-card compact">
+          <div class="metric-icon gold">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="8" width="18" height="4" rx="1"></rect>
+              <path d="M12 8v13"></path>
+              <path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"></path>
+              <path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"></path>
+            </svg>
+          </div>
+          <div>
+            <h3>Reward Catalog</h3>
+            <p class="metric-value" id="metricRewardItems">--</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-grid" style="margin-top:24px;">
+        <div class="content-card">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <h2 style="margin:0">Pickup Snapshot</h2>
+            </div>
+            <button class="btn btn-secondary" onclick="showSection('waste-collection')">Manage</button>
+          </div>
+          <div id="dashboardRecentPickups" style="margin-top:16px; display:grid; gap:12px;"></div>
+        </div>
+
+        <div class="content-card">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <h2 style="margin:0">Orders Snapshot</h2>
+
+            </div>
+            <button class="btn btn-secondary" onclick="showSection('orders')">Review Orders</button>
+          </div>
+          <div id="dashboardRecentOrders" style="margin-top:16px; display:grid; gap:12px;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Waste Collection Management -->
+    <section id="waste-collection-section" class="section">
+      <div class="top-actions"
+        style="display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:20px;">
+        <div>
+          <h1 style="margin:0 0 6px 0">Waste Collection Management</h1>
+          <p style="margin:0;color:#6b7280;">Approve, schedule and close household pickup requests.</p>
+        </div>
+        <button class="btn btn-secondary" onclick="showSection('dashboard')">Back to Overview</button>
+      </div>
+
+      <div class="content-card">
+        <div class="filters-row">
+          <select id="pickupStatusFilter">
+            <option value="">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="processing">Processing</option>
+            <option value="picked">Picked</option>
+            <option value="completed">Completed</option>
+            <option value="rejected">Rejected</option>
+          </select>
+          <input id="pickupSearchInput" type="search" placeholder="Search by household, phone or waste type" />
+        </div>
+
+        <div class="table-wrapper" style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Household</th>
+                <th>Waste Type</th>
+                <th>Quantity</th>
+                <th>Address</th>
+                <th>Pickup Window</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="pickupTableBody">
+              <tr>
+                <td colspan="7">
+                  <div class="empty-state">Loading pickup requests…</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Orders & Marketplace Oversight -->
+    <section id="orders-section" class="section">
+      <div class="top-actions"
+        style="display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:20px;">
+        <div>
+          <h1 style="margin:0 0 6px 0">Orders & Delivery Queue</h1>
+          <p style="margin:0;color:#6b7280;">Track compost orders from farmers and keep deliveries moving.</p>
+        </div>
+        <button class="btn btn-secondary" onclick="showSection('dashboard')">Back to Overview</button>
+      </div>
+
+      <div class="content-card">
+        <div class="filters-row">
+          <select id="orderStatusFilter">
+            <option value="">All statuses</option>
+            <option value="pending">Pending approval</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="in-transit">In Transit</option>
+            <option value="delivered">Delivered</option>
+            <option value="rejected">Rejected</option>
+          </select>
+          <input id="orderSearchInput" type="search" placeholder="Search order ID, farmer name or phone" />
+        </div>
+
+        <div class="table-wrapper" style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Farmer</th>
+                <th>Compost Type</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Address</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody id="orderTableBody">
+              <tr>
+                <td colspan="6">
+                  <div class="empty-state">Loading orders…</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Inventory Dashboard -->
+    <section id="inventory-section" class="section">
+      <div class="top-actions"
+        style="display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:20px;">
+        <div>
+          <h1 style="margin:0 0 6px 0">Compost Inventory</h1>
+          <p style="margin:0;color:#6b7280;">Maintain compost availability and keep marketplace listings fresh.</p>
+        </div>
+        <button class="btn btn-secondary" onclick="showSection('dashboard')">Back to Overview</button>
+      </div>
+
+      <div class="grid-two">
+        <div class="content-card">
+          <h2 style="margin-top:0">Central Stock</h2>
+          <p class="muted">Update master compost stock that powers approvals.</p>
+          <form id="stockForm" style="margin-top:16px; display:flex; flex-direction:column; gap:12px;">
+            <div class="form-grid two">
+              <div>
+                <label for="newStock" style="font-weight:600;font-size:13px;">Available Stock (kg)</label>
+                <input type="number" id="newStock" placeholder="e.g., 500" min="0" />
+              </div>
+              <div>
+                <label for="newPrice" style="font-weight:600;font-size:13px;">Price per kg (₹)</label>
+                <input type="number" id="newPrice" placeholder="e.g., 35" min="0" step="0.5" />
+              </div>
+            </div>
+            <button type="submit" class="btn-primary" style="align-self:flex-start;">Update Stock</button>
+            <div class="muted" style="font-size:13px;">Current: <span id="availableStock">--</span> kg • ₹<span
+                id="pricePerKg">--</span>/kg</div>
+          </form>
+        </div>
+
+        <div class="content-card">
+          <h2 style="margin-top:0">Add Compost Variety</h2>
+          <p class="muted">Feature new compost batches for farmers to browse.</p>
+          <form id="inventoryForm" class="form-grid" style="margin-top:16px;">
+            <div class="form-grid two">
+              <div>
+                <label for="compostName" style="font-weight:600;font-size:13px;">Compost Name</label>
+                <input id="compostName" placeholder="Premium Kitchen Compost" required />
+              </div>
+              <div>
+                <label for="compostCategory" style="font-weight:600;font-size:13px;">Category</label>
+                <input id="compostCategory" placeholder="premium" />
+              </div>
+            </div>
+            <div class="form-grid two">
+              <div>
+                <label for="compostPrice" style="font-weight:600;font-size:13px;">Price per kg (₹)</label>
+                <input id="compostPrice" type="number" min="0" step="0.5" placeholder="30" required />
+              </div>
+              <div>
+                <label for="compostStock" style="font-weight:600;font-size:13px;">Stock (kg)</label>
+                <input id="compostStock" type="number" min="0" placeholder="1000" required />
+              </div>
+            </div>
+            <div>
+              <label for="compostImage" style="font-weight:600;font-size:13px;">Image</label>
+              <input type="file" id="compostImage" accept="image/*" onchange="handleCompostImageChange(event)" />
+              <div id="compostImagePreview" style="margin-top:8px;"></div>
+              <input type="hidden" id="compostImageUrl" />
+            </div>
+            <button type="submit" class="btn-primary" style="justify-self:flex-start;">Add / Update Compost</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="content-card" style="margin-top:24px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h2 style="margin:0">Marketplace Inventory</h2>
+            <p class="muted" style="margin:4px 0 0 0;">These listings sync with the farmer marketplace.</p>
+          </div>
+          <div class="filters-row" style="margin:0;">
+            <input id="inventorySearchInput" type="search" placeholder="Filter by compost name or category" />
+          </div>
+        </div>
+        <div id="inventoryList" class="card-list" style="margin-top:16px;"></div>
+      </div>
+    </section>
+
+    <!-- Rewards Management -->
+    <section id="rewards-section" class="section">
+      <div class="top-actions"
+        style="display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:20px;">
+        <div>
+          <h1 style="margin:0 0 6px 0">Reward Catalog</h1>
+          <p style="margin:0;color:#6b7280;">Curate redeemable perks aligned with farmer & household dashboards.</p>
+        </div>
+        <button class="btn btn-secondary" onclick="showSection('dashboard')">Back to Overview</button>
+      </div>
+
+      <div class="grid-two">
+        <div class="content-card">
+          <h2 style="margin-top:0">Add Reward Item</h2>
+          <form id="rewardForm" class="form-grid" style="margin-top:16px;">
+            <div class="form-grid two">
+              <div>
+                <label for="rewardTitle" style="font-weight:600;font-size:13px;">Reward Title</label>
+                <input id="rewardTitle" placeholder="₹100 Grocery Voucher" required />
+              </div>
+              <div>
+                <label for="rewardPoints" style="font-weight:600;font-size:13px;">Points Required</label>
+                <input id="rewardPoints" type="number" min="0" step="10" placeholder="800" required />
+              </div>
+            </div>
+            <div>
+              <label for="rewardDescription" style="font-weight:600;font-size:13px;">Description</label>
+              <textarea id="rewardDescription" rows="3"
+                placeholder="Brief details to show households and farmers"></textarea>
+            </div>
+            <div>
+              <label for="rewardImage" style="font-weight:600;font-size:13px;">Image</label>
+              <input type="file" id="rewardImage" accept="image/*" onchange="handleRewardImageChange(event)" />
+              <div id="rewardImagePreview" style="margin-top:8px;"></div>
+              <input type="hidden" id="rewardImageUrl" />
+            </div>
+            <button type="submit" class="btn-primary" style="justify-self:flex-start;">Save Reward</button>
+          </form>
+        </div>
+
+        <div class="content-card">
+          <h2 style="margin-top:0">Catalog Snapshot</h2>
+          <div class="muted" style="font-size:13px;">Household dashboard pulls these reward items for redemption.</div>
+          <div id="rewardList" class="card-list" style="margin-top:16px;"></div>
+        </div>
+      </div>
+    </section>
+    <!-- ADD THIS TO admin-dashboard.html AFTER THE REWARDS SECTION -->
+
+    <!-- Route Planning Section -->
+    <!-- Unified Route Planning Section -->
+    <section id="route-planning-section" class="section">
+      <div class="top-actions">
+        <div>
+          <h1 style="margin:0 0 6px 0">🗺️ Route Planning & Optimization</h1>
+          <p style="margin:0;color:#6b7280;">Plan efficient routes using AI-powered optimization</p>
+        </div>
+        <button class="btn btn-secondary" onclick="showSection('dashboard')">Back to Overview</button>
+      </div>
+
+      <!-- ✅ ROUTE TYPE TOGGLE -->
+      <div
+        style="background:white;padding:20px;border-radius:12px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+        <div style="display:flex;align-items:center;gap:16px;">
+          <span style="font-weight:600;color:#6b7280;">Route Type:</span>
+          <div class="route-toggle">
+            <button class="route-toggle-btn active" data-type="pickup" onclick="switchRouteType('pickup')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path>
+                <path d="M15 18H9"></path>
+                <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"></path>
+                <circle cx="17" cy="18" r="2"></circle>
+                <circle cx="7" cy="18" r="2"></circle>
+              </svg>
+              Waste Pickup Routes
+            </button>
+            <button class="route-toggle-btn" data-type="delivery" onclick="switchRouteType('delivery')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path
+                  d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z">
+                </path>
+                <path d="M12 22V12"></path>
+                <polyline points="3.29 7 12 12 20.71 7"></polyline>
+              </svg>
+              Compost Delivery Routes
+            </button>
+          </div>
+        </div>
+      </div>
+
+
+      <button class="btn btn-secondary" onclick="fixOrderCoordinates()" style="margin-left:8px;">
+        🔧 Fix Missing Coordinates
+      </button>
+
+      <!-- Route Layout -->
+      <div class="route-layout">
+        <!-- Map Section -->
+        <div class="map-wrapper">
+          <div class="map-controls">
+            <button class="btn-map btn-optimize" onclick="optimizeCurrentRoute()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path
+                  d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+              </svg>
+              Optimize Route
+            </button>
+            <button class="btn-map btn-refresh" onclick="refreshCurrentMap()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16" />
+              </svg>
+              Refresh
+            </button>
+            <button class="btn-map btn-clear" onclick="clearCurrentRoute()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
+              Clear
+            </button>
+          </div>
+
+          <div id="routeMap"></div>
+
+          <div class="loading-overlay" id="routeLoadingOverlay">
+            <div class="spinner"></div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="route-sidebar">
+          <!-- Metrics Card -->
+          <div class="info-card">
+            <h3>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+              Route Metrics
+            </h3>
+            <div class="metric-grid">
+              <div class="metric">
+                <div class="metric-label">Total Stops</div>
+                <div class="metric-value" id="routeTotalStops">0</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Distance</div>
+                <div class="metric-value" id="routeTotalDistance">0 km</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Est. Time</div>
+                <div class="metric-value" id="routeEstimatedTime">0 min</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label" id="routeMetricLabel">Time Saved</div>
+                <div class="metric-value" id="routeMetricValue">0 min</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Optimization Method -->
+          <div class="info-card" id="routeMethodCard" style="display:none;">
+            <h3>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                <path d="M2 17l10 5 10-5" />
+                <path d="M2 12l10 5 10-5" />
+              </svg>
+              Optimization Method
+            </h3>
+            <div id="routeMethodInfo" style="font-size:14px;color:#64748b;line-height:1.6;"></div>
+          </div>
+
+          <!-- Route Order Card -->
+          <div class="info-card">
+            <h3>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              </svg>
+              <span id="routeSequenceTitle">Route Sequence</span>
+            </h3>
+            <div class="stop-list" id="routeStopList">
+              <div class="empty-state">
+                Click "Optimize Route" to generate sequence
+              </div>
+            </div>
+          </div>
+
+          <!-- Export Options -->
+          <div class="info-card">
+            <h3>Export Route</h3>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-secondary" onclick="exportCurrentRoutePDF()" style="flex:1;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+                PDF
+              </button>
+              <button class="btn btn-secondary" onclick="exportCurrentRouteCSV()" style="flex:1;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+                CSV
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="js/admin.js"></script>
+
+</body>
+
+</html>

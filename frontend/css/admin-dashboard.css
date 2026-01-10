@@ -1,0 +1,1724 @@
+/* Admin Dashboard CSS - Matching Household Dashboard Style */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-green: #00A63E;
+    --light-green: #dcfce7;
+    --light-gray: #f3f4f6;
+    --dark-gray: #1f2937;
+    --gray: #6b7280;
+    --white: #ffffff;
+    --border-radius: 12px;
+    --transition: all 0.3s ease;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: #f9fafb;
+    color: var(--dark-gray);
+    line-height: 1.6;
+}
+
+/* Navigation Bar */
+.navbar {
+    background: var(--white);
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    padding: 0;
+}
+
+.nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 70px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--dark-gray);
+}
+
+.logo svg {
+    width: 32px;
+    height: 32px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 8px;
+    list-style: none;
+}
+
+.nav-link {
+    padding: 8px 16px;
+    text-decoration: none;
+    color: var(--gray);
+    font-weight: 500;
+    border-radius: 8px;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    background: var(--light-green);
+    color: var(--primary-green);
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    background: var(--primary-green);
+    color: var(--white);
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.logout-btn {
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid var(--gray);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--gray);
+    transition: var(--transition);
+}
+
+.logout-btn:hover {
+    background: var(--gray);
+    color: var(--white);
+}
+
+/* Main Container */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px 24px 60px;
+}
+
+/* Sections */
+.section {
+    display: none;
+}
+
+.section.active {
+    display: block;
+}
+
+/* Welcome Section */
+.welcome-section {
+    margin-bottom: 32px;
+}
+
+.welcome-section h1 {
+    font-size: 42px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--dark-gray);
+}
+
+.welcome-section p {
+    font-size: 18px;
+    color: var(--gray);
+}
+
+/* Metrics Grid */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.metric-card {
+    background: var(--white);
+    padding: 24px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: var(--transition);
+}
+
+.metric-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.metric-card.compact {
+    display: flex;
+    align-items: center;
+}
+
+.metric-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.metric-icon.gold {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.metric-icon.green {
+    background: var(--light-green);
+    color: var(--primary-green);
+}
+
+.metric-icon.blue {
+    background: #dbeafe;
+    color: #3b82f6;
+}
+
+.metric-icon.purple {
+    background: #e9d5ff;
+    color: #9333ea;
+}
+
+.metric-info {
+    flex: 1;
+}
+
+.metric-card h3 {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray);
+    margin-bottom: 4px;
+}
+
+.metric-info h3 {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray);
+    margin-bottom: 4px;
+}
+
+.metric-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--dark-gray);
+}
+
+.muted {
+    font-size: 14px;
+    color: var(--gray);
+    margin-top: 4px;
+}
+
+/* Content Grid */
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+}
+
+.content-card {
+    background: var(--white);
+    padding: 24px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+}
+
+.content-card h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--dark-gray);
+}
+
+/* Top Actions */
+.top-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    gap: 16px;
+}
+
+/* Buttons */
+.btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--transition);
+    font-size: 14px;
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 14px 24px;
+    background: var(--primary-green);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-primary:hover {
+    background: #16a34a;
+}
+
+.btn-secondary {
+    background: var(--dark-gray);
+    color: var(--white);
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.btn-secondary:hover {
+    background: var(--gray);
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.action-buttons button {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    transition: var(--transition);
+}
+
+.btn-success {
+    background: #16a34a;
+    color: #fff;
+}
+
+.btn-success:hover {
+    background: #15803d;
+}
+
+.btn-warning {
+    background: #f59e0b;
+    color: #fff;
+}
+
+.btn-warning:hover {
+    background: #d97706;
+}
+
+.btn-danger {
+    background: #dc2626;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background: #b91c1c;
+}
+
+.btn-ghost {
+    background: var(--light-gray);
+    color: var(--dark-gray);
+}
+
+.btn-ghost:hover {
+    background: #e5e7eb;
+}
+
+/* Filters */
+.filters-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.filters-row select,
+.filters-row input[type="search"] {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: var(--light-gray);
+    font-size: 14px;
+    transition: var(--transition);
+}
+
+.filters-row input[type="search"] {
+    flex: 1;
+    min-width: 200px;
+}
+
+.filters-row select:focus,
+.filters-row input:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    background: var(--white);
+}
+
+/* Table Styles */
+.table-wrapper {
+    overflow-x: auto;
+    border-radius: var(--border-radius);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    text-align: left;
+    padding: 16px;
+}
+
+th {
+    background: var(--light-gray);
+    color: var(--gray);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+tr {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+tbody tr:hover {
+    background: #f9fafb;
+}
+
+tr:last-child {
+    border-bottom: none;
+}
+
+/* Badges */
+.badge {
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: capitalize;
+    display: inline-block;
+}
+
+.badge.pending {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.badge.processing {
+    background: #eef2ff;
+    color: #3730a3;
+}
+
+.badge.picked {
+    background: #f5f3ff;
+    color: #6d28d9;
+}
+
+.badge.completed {
+    background: var(--light-green);
+    color: var(--primary-green);
+}
+
+.badge.in-transit {
+    background: #dbeafe;
+    color: #1e3a8a;
+}
+
+.badge.confirmed {
+    background: #fef9c3;
+    color: #92400e;
+}
+
+.badge.rejected {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+/* Form Styles */
+.form-grid {
+    display: grid;
+    gap: 16px;
+}
+
+.form-grid.two {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.form-grid label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--dark-gray);
+}
+
+.form-grid input,
+.form-grid select,
+.form-grid textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    background: var(--light-gray);
+    transition: var(--transition);
+}
+
+.form-grid input:focus,
+.form-grid select:focus,
+.form-grid textarea:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    background: var(--white);
+}
+
+/* Grid Layouts */
+.grid-two {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+}
+
+/* Card List */
+.card-list {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    margin-top: 16px;
+}
+
+.card-item {
+    padding: 20px;
+    border-radius: var(--border-radius);
+    background: var(--white);
+    border: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: var(--transition);
+}
+
+.card-item:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.card-item img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.card-item h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Empty State */
+.empty-state {
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--gray);
+    background: var(--light-gray);
+    border-radius: var(--border-radius);
+}
+
+/* Pickup/Order Item */
+.pickup-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+.pickup-item:hover {
+    background: var(--light-gray);
+}
+
+.pickup-details {
+    flex: 1;
+}
+
+.pickup-description {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--dark-gray);
+}
+
+.pickup-meta {
+    font-size: 14px;
+    color: var(--gray);
+}
+
+.order-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+.order-item:hover {
+    background: var(--light-gray);
+}
+
+.order-item-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.order-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.order-icon.pending {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.order-icon.confirmed {
+    background: #fef9c3;
+    color: #92400e;
+}
+
+.order-icon.in-transit {
+    background: #dbeafe;
+    color: #1e3a8a;
+}
+
+.order-icon.delivered {
+    background: var(--light-green);
+    color: var(--primary-green);
+}
+
+.order-meta {
+    font-size: 14px;
+    color: var(--gray);
+}
+
+/* Toast Notifications */
+.toast-container {
+    position: fixed;
+    top: 90px;
+    right: 24px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.toast {
+    background: var(--white);
+    padding: 16px 20px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 300px;
+    animation: slideIn 0.3s ease;
+}
+
+.toast.success {
+    border-left: 4px solid var(--primary-green);
+}
+
+.toast.error {
+    border-left: 4px solid #dc2626;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .grid-two {
+        grid-template-columns: 1fr;
+    }
+
+    .route-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .route-sidebar {
+        max-height: none;
+    }
+
+    .map-wrapper {
+        height: 500px;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-container {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 16px;
+    }
+
+    .logo {
+        font-size: 18px;
+    }
+
+    .logo svg {
+        width: 28px;
+        height: 28px;
+    }
+
+    .nav-links {
+        order: 3;
+        width: 100%;
+        margin-top: 16px;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .nav-link {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+
+    .nav-actions {
+        gap: 12px;
+    }
+
+    .user-avatar,
+    .notification-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+    }
+
+    .logout-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    .container {
+        padding: 24px 16px 60px;
+    }
+
+    .welcome-section h1 {
+        font-size: 32px;
+    }
+
+    .welcome-section p {
+        font-size: 16px;
+    }
+
+    .metrics-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .metric-card {
+        padding: 16px;
+        gap: 16px;
+    }
+
+    .metric-icon {
+        width: 48px;
+        height: 48px;
+    }
+
+    .metric-value {
+        font-size: 24px;
+    }
+
+    .metric-info h3 {
+        font-size: 13px;
+    }
+
+    .content-grid {
+        gap: 16px;
+    }
+
+    .content-card {
+        padding: 16px;
+    }
+
+    .content-card h2 {
+        font-size: 18px;
+    }
+
+    .top-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .filters-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .filters-row input[type="search"] {
+        min-width: 100%;
+    }
+
+    .form-grid.two {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+
+    .table-wrapper {
+        font-size: 12px;
+    }
+
+    th,
+    td {
+        padding: 12px;
+    }
+
+    .card-list {
+        grid-template-columns: 1fr;
+    }
+
+    .card-item {
+        padding: 16px;
+    }
+
+    .card-item img {
+        height: 140px;
+    }
+
+    .pickup-item {
+        gap: 12px;
+        padding: 12px;
+    }
+
+    .pickup-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+
+    .order-item {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .order-item-left {
+        width: 100%;
+    }
+
+    .order-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .toast-container {
+        top: 80px;
+        right: 16px;
+        left: 16px;
+    }
+
+    .toast {
+        min-width: unset;
+        width: 100%;
+    }
+
+    .btn {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .btn-primary {
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+
+    .btn-map {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .map-controls {
+        flex-direction: column;
+        gap: 6px;
+        top: 8px;
+        right: 8px;
+    }
+
+    .route-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .route-sidebar {
+        max-height: 300px;
+    }
+
+    .stop-list {
+        max-height: 200px;
+    }
+
+    .route-toggle {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .route-toggle-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 640px) {
+    .nav-container {
+        padding: 12px;
+        gap: 12px;
+    }
+
+    .logo {
+        font-size: 16px;
+    }
+
+    .logo svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .nav-links {
+        gap: 4px;
+    }
+
+    .nav-link {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+
+    .container {
+        padding: 16px 12px 50px;
+    }
+
+    .welcome-section h1 {
+        font-size: 26px;
+        margin-bottom: 4px;
+    }
+
+    .welcome-section p {
+        font-size: 14px;
+    }
+
+    .metrics-grid {
+        gap: 12px;
+    }
+
+    .metric-card {
+        padding: 12px;
+        gap: 12px;
+        flex-direction: column;
+    }
+
+    .metric-icon {
+        width: 44px;
+        height: 44px;
+    }
+
+    .metric-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .metric-value {
+        font-size: 20px;
+    }
+
+    .metric-info h3 {
+        font-size: 12px;
+    }
+
+    .content-card {
+        padding: 12px;
+    }
+
+    .content-card h2 {
+        font-size: 16px;
+        margin-bottom: 16px;
+    }
+
+    .filters-row {
+        gap: 8px;
+    }
+
+    .filters-row input[type="search"],
+    .filters-row select {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-group label {
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    th,
+    td {
+        padding: 8px;
+        font-size: 11px;
+    }
+
+    .badge {
+        padding: 4px 8px;
+        font-size: 10px;
+    }
+
+    .card-item {
+        padding: 12px;
+    }
+
+    .card-item img {
+        height: 120px;
+    }
+
+    .card-item h3 {
+        font-size: 14px;
+    }
+
+    .pickup-item {
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .pickup-description {
+        font-size: 13px;
+    }
+
+    .pickup-meta {
+        font-size: 12px;
+    }
+
+    .order-item {
+        padding: 12px;
+        gap: 10px;
+    }
+
+    .order-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    .toast-container {
+        top: 70px;
+        right: 12px;
+        left: 12px;
+        gap: 8px;
+    }
+
+    .toast {
+        padding: 12px 16px;
+        font-size: 12px;
+    }
+
+    .btn {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+
+    .btn-primary {
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+
+    .map-wrapper {
+        height: 400px;
+    }
+
+    .btn-map {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+
+    .map-controls {
+        top: 6px;
+        right: 6px;
+        gap: 4px;
+    }
+
+    .stop-number {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+
+    .stop-name {
+        font-size: 12px;
+    }
+
+    .stop-address {
+        font-size: 11px;
+    }
+
+    .stop-quantity {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav-container {
+        padding: 10px;
+    }
+
+    .logo {
+        font-size: 14px;
+    }
+
+    .logo svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .user-avatar,
+    .notification-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+
+    .logout-btn {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+
+    .container {
+        padding: 12px 10px 40px;
+    }
+
+    .welcome-section h1 {
+        font-size: 22px;
+    }
+
+    .welcome-section p {
+        font-size: 13px;
+    }
+
+    .metrics-grid {
+        gap: 10px;
+    }
+
+    .metric-card {
+        padding: 10px;
+        flex-direction: column;
+    }
+
+    .metric-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .metric-value {
+        font-size: 18px;
+    }
+
+    .metric-info h3 {
+        font-size: 11px;
+    }
+
+    .content-card {
+        padding: 10px;
+    }
+
+    .content-card h2 {
+        font-size: 14px;
+    }
+
+    .filters-row {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .filters-row input[type="search"],
+    .filters-row select {
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+
+    .form-group {
+        margin-bottom: 12px;
+    }
+
+    .form-group label {
+        font-size: 12px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+
+    th,
+    td {
+        padding: 6px;
+        font-size: 10px;
+    }
+
+    .badge {
+        padding: 2px 6px;
+        font-size: 9px;
+    }
+
+    .card-list {
+        gap: 12px;
+    }
+
+    .card-item {
+        padding: 10px;
+        gap: 8px;
+    }
+
+    .card-item img {
+        height: 100px;
+    }
+
+    .card-item h3 {
+        font-size: 13px;
+    }
+
+    .pickup-item {
+        padding: 8px;
+    }
+
+    .pickup-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .order-item {
+        padding: 10px;
+    }
+
+    .order-icon {
+        width: 30px;
+        height: 30px;
+    }
+
+    .toast-container {
+        top: 60px;
+        right: 10px;
+        left: 10px;
+    }
+
+    .toast {
+        padding: 10px 12px;
+        font-size: 11px;
+    }
+
+    .btn {
+        padding: 4px 8px;
+        font-size: 10px;
+    }
+
+    .btn-primary {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .map-wrapper {
+        height: 350px;
+    }
+
+    .btn-map {
+        padding: 4px 8px;
+        font-size: 10px;
+    }
+
+    .map-controls {
+        top: 4px;
+        right: 4px;
+    }
+
+    .stop-item {
+        padding: 8px;
+    }
+
+    .stop-number {
+        width: 24px;
+        height: 24px;
+        font-size: 10px;
+    }
+
+    .stop-name {
+        font-size: 11px;
+    }
+
+    .stop-address {
+        font-size: 10px;
+    }
+
+    .route-toggle-btn {
+        padding: 6px 8px;
+        font-size: 10px;
+    }
+}
+
+
+
+
+/* ADD THIS TO css/admin-dashboard.css */
+
+/* ============================================
+   ROUTE PLANNING SECTION
+   ============================================ */
+
+.route-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 20px;
+}
+
+.map-wrapper {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  position: relative;
+  height: 650px;
+}
+
+#routeMap {
+  height: 100%;
+  width: 100%;
+}
+
+.map-controls {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+  display: flex;
+  gap: 8px;
+}
+
+.btn-map {
+  background: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  transition: all 0.2s;
+  color: #0f1724;
+}
+
+.btn-map:hover { 
+  transform: translateY(-1px); 
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2); 
+}
+
+.btn-map:active {
+  transform: translateY(0);
+}
+
+.btn-optimize {
+  background: #00A63E;
+  color: white;
+}
+
+.btn-optimize:hover {
+  background: #008c35;
+}
+
+.btn-clear {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-clear:hover {
+  background: #dc2626;
+}
+
+.btn-refresh {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-refresh:hover {
+  background: #2563eb;
+}
+
+.route-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 650px;
+  overflow-y: auto;
+}
+
+.stop-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 8px;
+}
+
+.stop-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.stop-list::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.stop-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.stop-list::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.stop-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid #e2e8f0;
+  transition: background 0.2s;
+}
+
+.stop-item:hover {
+  background: #f8fafc;
+}
+
+.stop-item:last-child { 
+  border-bottom: none; 
+}
+
+.stop-number {
+  width: 32px;
+  height: 32px;
+  background: #00A63E;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.stop-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.stop-name {
+  font-weight: 600;
+  color: #0f1724;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stop-address {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stop-quantity {
+  font-size: 13px;
+  color: #00A63E;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* Custom Leaflet marker styles */
+.custom-marker {
+  background: white;
+  border: 3px solid #00A63E;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #00A63E;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.optimized-marker {
+  background: #00A63E;
+  color: white;
+  animation: markerPulse 2s ease-in-out infinite;
+}
+
+@keyframes markerPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .route-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .route-sidebar {
+    max-height: none;
+  }
+  
+  .map-wrapper {
+    height: 500px;
+  }
+}
+
+@media (max-width: 768px) {
+  .map-controls {
+    top: 8px;
+    right: 8px;
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .btn-map {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+} 
+
+/* Route Type Toggle */
+.route-toggle {
+  display: flex;
+  gap: 8px;
+  background: #f8fafc;
+  padding: 4px;
+  border-radius: 10px;
+}
+
+.route-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  color: #64748b;
+  transition: all 0.2s;
+}
+
+.route-toggle-btn:hover {
+  background: #e2e8f0;
+  color: #0f1724;
+}
+
+.route-toggle-btn.active {
+  background: #00A63E;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 166, 62, 0.3);
+}
+
+.route-toggle-btn svg {
+  flex-shrink: 0;
+}
+
+/* ============================================
+   DEPOT (COMPOST CENTER) MARKER STYLES
+   ============================================ */
+
+.depot-marker {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border: 4px solid white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4), 0 0 0 4px rgba(59, 130, 246, 0.1);
+  animation: depotPulse 2s ease-in-out infinite;
+  cursor: pointer;
+  position: relative;
+}
+
+.depot-marker::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: depotRipple 2s ease-in-out infinite;
+}
+
+.depot-marker svg {
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+@keyframes depotPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4), 0 0 0 4px rgba(59, 130, 246, 0.1);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.5), 0 0 0 6px rgba(59, 130, 246, 0.15);
+  }
+}
+
+@keyframes depotRipple {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* Update stop number for depot */
+.stop-number {
+  width: 32px;
+  height: 32px;
+  background: #00A63E;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* Depot stop in list */
+.stop-item:has(.stop-number[style*="3b82f6"]) {
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, transparent 100%);
+  border-left: 3px solid #3b82f6;
+}
+
+.stop-item:has(.stop-number[style*="3b82f6"]):hover {
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.1) 0%, transparent 100%);
+}

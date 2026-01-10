@@ -1,0 +1,9 @@
+{
+    "name": "Household A",
+    "email": "house@example.com",
+    "password": "pass123",
+    "role": "household",
+    "address": "My Home",
+    "phone": "111111111"
+  }
+  

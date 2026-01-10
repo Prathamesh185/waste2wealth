@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Farmer Dashboard – Waste2Wealth</title>
+    <link rel="stylesheet" href="css/farmer-dashboard.css">
+    
+    <!-- ✅ ADD LEAFLET -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+</head>
+
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 32 32" fill="none">
+                    <!-- Darker green circular background (updated color) -->
+                    <circle cx="16" cy="16" r="15" fill="#00A63E"></circle>
+
+                    <!-- White-edged leaf with padding (scaled and centered) -->
+                    <g transform="translate(3,3) scale(0.82)">
+                        <path d="M15 25A7 7 0 0 1 13.8 11.1C19.5 10 21 9.48 23 7c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"
+                            stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                            fill="none"></path>
+                        <path d="M6 26c0-3 1.85-5.36 5.08-6C13.5 19.52 16 18 17 17" stroke="white" stroke-width="2.5"
+                            stroke-linecap="round" str="" oke-linejoin="round" fill="none"></path>
+                    </g>
+                </svg>
+                <span>Waste2Wealth</span>
+            </div>
+
+      <div class="nav-links">
+        <a href="#" class="nav-link active" data-section="dashboard">Dashboard</a>
+        <a href="#" class="nav-link" data-section="store">Browse Store</a>
+        <a href="#" class="nav-link" data-section="order-history">Order History</a>
+      </div>
+
+      <div class="nav-actions">
+        <div class="notification-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                </div>
+        <div class="user-avatar"><span id="userInitial">F</span></div>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container" style="padding-top:20px; padding-bottom:60px;">
+    <!-- Dashboard Section -->
+    <div id="dashboard-section" class="section active">
+      <div class="top-actions">
+        <div>
+          <h1 style="margin:0 0 6px 0">Welcome back, Farmer! 🌾</h1>
+          <p style="margin:0;color:#6b7280;">Track your compost purchases and manage orders</p>
+        </div>
+        <div>
+          <button class="btn btn-secondary" id="viewStoreBtn" onclick="showSection('store')">Browse Store</button>
+        </div>
+      </div>
+
+      <!-- Metrics -->
+      <div class="metrics-row" id="metricsRow">
+      <div class="metric-box">
+        <div style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:#ecfdf5;border-radius:10px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00A63E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path>
+            <path d="M12 22V12"></path>
+            <polyline points="3.29 7 12 12 20.71 7"></polyline>
+            <path d="m7.5 4.27 9 5.15"></path>
+          </svg>
+        </div>
+        <div>
+          <h4>Total Compost</h4>
+          <div class="value" id="metricTotalCompost">-- kg</div>
+        </div>
+      </div>
+
+      <div class="metric-box">
+        <div style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:#e0f2fe;border-radius:10px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0ea5a8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+        </div>
+        <div>
+          <h4>Total Spent</h4>
+          <div class="value" id="metricTotalSpent">₹--</div>
+        </div>
+      </div>
+
+      <div class="metric-box">
+        <div style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:#fff7ed;border-radius:10px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path>
+            <path d="M15 18H9"></path>
+            <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"></path>
+            <circle cx="17" cy="18" r="2"></circle>
+            <circle cx="7" cy="18" r="2"></circle>
+          </svg>
+        </div>
+        <div>
+          <h4>Active Orders</h4>
+          <div class="value" id="metricActiveOrders">--</div>
+        </div>
+      </div>
+
+      <div class="metric-box">
+        <div style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:#f3e8ff;border-radius:10px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+        </div>
+        <div>
+          <h4>Amount Saved</h4>
+          <div class="value" id="metricAmountSaved">₹--</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="recent-orders" id="recentOrdersCard">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div>
+          <h3 style="margin:0">Recent Orders</h3>
+          <p style="margin:0;color:#6b7280;font-size:13px;">Your latest compost purchases</p>
+        </div>
+        <div><button class="btn btn-secondary" onclick="showSection('order-history')">View All</button></div>
+      </div>
+
+      <div id="recentOrdersList">
+        <!-- order items inserted here -->
+      </div>
+    </div>
+    </div>
+
+    <!-- Store / Marketplace Section -->
+    <div id="store-section" class="section">
+      <div style="margin-bottom:24px;">
+        <h1 style="margin:0 0 6px 0">Compost Marketplace</h1>
+        <p style="margin:0;color:#6b7280">Browse and purchase high-quality organic compost from verified suppliers</p>
+      </div>
+
+      <div style="display:flex; gap:12px; margin-top:12px; align-items:center;">
+        <input id="searchInput" type="search" placeholder="Search compost products..."
+          style="flex:1;padding:12px;border-radius:10px;border:1px solid #eef2f6;background:#f8fafc;">
+        <select id="categoryFilter" style="padding:10px;border-radius:10px;border:1px solid #eef2f6;background:#fff;">
+          <option value="">All Categories</option>
+          <option value="premium">Premium</option>
+          <option value="vegetable">Vegetable</option>
+          <option value="garden">Garden</option>
+        </select>
+      </div>
+
+      <div class="store-grid" id="storeGrid">
+        <!-- product cards -->
+      </div>
+    </div>
+
+    <!-- Order History Section -->
+    <div id="order-history-section" class="section">
+      <div style="margin-bottom:24px;">
+        <h1 style="margin:0 0 6px 0">Order History</h1>
+        <p style="margin:0;color:#6b7280">View all your past and current compost orders</p>
+      </div>
+
+      <div class="history-card" style="background:#fff; border-radius:12px; padding:18px; box-shadow:0 6px 18px rgba(15,23,42,0.04);">
+        <div class="order-list" id="orderList" style="margin-top:18px; display:flex; flex-direction:column; gap:12px;">
+          <div class="empty-state" style="color:#6b7280; padding:28px; text-align:center;">Loading orders…</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Order Modal (hidden by default) -->
+  <div id="orderModalRoot" style="display:none;"></div>
+
+  <script src="js/farmer-dashboard.js"></script>
+
+  <!-- Farmer Location Picker Modal -->
+<div id="farmerLocationPickerModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 10000; padding: 20px;">
+    <div style="background: white; max-width: 800px; margin: 0 auto; padding: 24px; border-radius: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div>
+                <h3 style="margin: 0;">📍 Select Your Delivery Location</h3>
+                <p style="margin: 4px 0 0 0; color: #6b7280; font-size: 13px;">Click on the map to mark your exact farm/delivery location</p>
+            </div>
+            <button onclick="closeFarmerLocationPicker()" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
+        </div>
+        <div id="farmerLocationPickerMap" style="height: 450px; width: 100%; border-radius: 8px;"></div>
+        <div style="margin-top: 16px; display: flex; gap: 12px; justify-content: flex-end;">
+            <button class="btn-secondary" onclick="closeFarmerLocationPicker()">Cancel</button>
+            <button class="btn-primary" onclick="confirmFarmerLocation()">Confirm Location</button>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waste to Wealth - Transform Waste into Opportunity</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 32 32" fill="none">
+                    <!-- Darker green circular background (updated color) -->
+                    <circle cx="16" cy="16" r="15" fill="#00A63E" />
+
+                    <!-- White-edged leaf with padding (scaled and centered) -->
+                    <g transform="translate(3,3) scale(0.82)">
+                        <path d="M15 25A7 7 0 0 1 13.8 11.1C19.5 10 21 9.48 23 7c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"
+                            stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                            fill="none" />
+                        <path d="M6 26c0-3 1.85-5.36 5.08-6C13.5 19.52 16 18 17 17" stroke="white" stroke-width="2.5"
+                            stroke-linecap="round" str oke-linejoin="round" fill="none" />
+                    </g>
+                </svg>
+
+
+                <span>Waste to Wealth</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#impact">Impact</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="/signin" class="sign-in">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <circle cx="10" cy="7" r="4" stroke="currentColor" stroke-width="1.5" />
+                        <path d="M3 18 C3 14, 6 11, 10 11 C14 11, 17 14, 17 18" stroke="currentColor"
+                            stroke-width="1.5" />
+                    </svg>
+                    Sign In
+                </a>
+                <button class="btn btn-primary" onclick="window.location.href='/signin'">Get Started</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <span class="badge">Transform Waste into Opportunity</span>
+                    <div>
+                        <h1>Turn Your Waste into</h1>
+                        <h1 style="color: #00A63E;">Wealth Today</h1>
+                    </div>
+
+                    <p class="hero-description">
+                        Join thousands of eco-conscious individuals and businesses turning their waste into valuable
+                        resources. Our innovative platform makes recycling rewarding, convenient, and impactful.
+                    </p>
+
+                    <div class="hero-buttons">
+                        <button class="btn btn-primary btn-large" onclick="window.location.href='/signin'">
+                            Start Recycling
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-arrow-right">
+                                <path d="M5 12h14"></path>
+                                <path d="m12 5 7 7-7 7"></path>
+                            </svg>
+
+                        </button>
+                        <button class="btn btn-secondary btn-large">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-play">
+                                <path
+                                    d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z">
+                                </path>
+                            </svg>
+
+                            Watch Demo
+                        </button>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <div class="stat-number">2.5M+</div>
+                            <div class="stat-text">Tons Recycled</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">50K+</div>
+                            <div class="stat-text">Active Users</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">150+</div>
+                            <div class="stat-text">Cities</div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="hero-image">
+                    <div class="image-wrapper">
+                        <img src="images/hero-image.jpg" alt="Recycling in action" class="hero-img">
+                        <div class="overlay-stats">
+                            <div class="stat-label">CO₂ Saved This Month</div>
+                            <div class="stat-value">
+                                <span>1,247 kg</span>
+                                <span class="stat-change">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                        <circle cx="8" cy="8" r="7" fill="#22c55e" />
+                                        <path d="M8 4 L8 12 M8 4 L5 7 M8 4 L11 7" stroke="white" stroke-width="1.5" />
+                                    </svg>
+                                    23%
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <span class="section-badge">Features</span>
+            <h2 class="section-title">Everything You Need for Sustainable Living</h2>
+            <p class="section-description">Our platform provides comprehensive tools to help you manage waste
+                effectively and contribute to a greener planet.</p>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: #dcfce7;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="#00A63E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-recycle h-6 w-6" aria-hidden="true">
+                            <path d="M7 19H4.815a1.83 1.83 0 0 1-1.57-.881 1.785 1.785 0 0 1-.004-1.784L7.196 9.5">
+                            </path>
+                            <path d="M11 19h8.203a1.83 1.83 0 0 0 1.556-.89 1.784 1.784 0 0 0 0-1.775l-1.226-2.12">
+                            </path>
+                            <path d="m14 16-3 3 3 3"></path>
+                            <path d="M8.293 13.596 7.196 9.5 3.1 10.598"></path>
+                            <path
+                                d="m9.344 5.811 1.093-1.892A1.83 1.83 0 0 1 11.985 3a1.784 1.784 0 0 1 1.546.888l3.943 6.843">
+                            </path>
+                            <path d="m13.378 9.633 4.096 1.098 1.097-4.096"></path>
+                        </svg>
+                    </div>
+                    <h3>Smart Waste Management</h3>
+                    <p>AI-powered waste classification and routing to ensure maximum recycling efficiency.</p>
+                </div>
+
+
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: #dbeafe;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-trending-up h-6 w-6" aria-hidden="true">
+                            <path d="M16 7h6v6"></path>
+                            <path d="m22 7-8.5 8.5-5-5L2 17"></path>
+                        </svg>
+                    </div>
+                    <h3>Earn While You Recycle</h3>
+                    <p>Get rewarded with points and cashback for every kilogram of waste you recycle.</p>
+                </div>
+
+
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: #e9d5ff;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-shopping-cart h-6 w-6" aria-hidden="true">
+                            <circle cx="8" cy="21" r="1"></circle>
+                            <circle cx="19" cy="21" r="1"></circle>
+                            <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12">
+                            </path>
+                        </svg>
+
+                    </div>
+                    <h3>Affordable Marketplace</h3>
+                    <p>Farmers and gardeners can purchase premium compost at affordable prices.</p>
+                </div>
+
+
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: #fed7aa;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-award h-6 w-6" aria-hidden="true">
+                            <defs>
+                                <!-- vibrant orange gradient for a premium feel -->
+                                <linearGradient id="awardGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#fb923c" />
+                                    <stop offset="100%" stop-color="#ea580c" />
+                                </linearGradient>
+                            </defs>
+
+                            <!-- ribbon and medal outline with gradient stroke -->
+                            <path
+                                d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"
+                                stroke="url(#awardGradient)" />
+                            <circle cx="12" cy="8" r="6" stroke="url(#awardGradient)" />
+                        </svg>
+
+                    </div>
+                    <h3>Achievement System</h3>
+                    <p>Unlock badges and compete with friends to become a sustainability champion.</p>
+                </div>
+
+
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: #fee2e2;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="#E7000B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-truck h-6 w-6" aria-hidden="true">
+                            <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path>
+                            <path d="M15 18H9"></path>
+                            <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14">
+                            </path>
+                            <circle cx="17" cy="18" r="2"></circle>
+                            <circle cx="7" cy="18" r="2"></circle>
+                        </svg>
+
+                    </div>
+                    <h3>Reliable Services</h3>
+                    <p>Timely pickups and professional handling of your organic waste materials.</p>
+                </div>
+
+
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: #ccfbf1;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-shield h-6 w-6" aria-hidden="true">
+                            <path
+                                d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3>Verified Recyclers</h3>
+                    <p>Connect only with certified and trusted waste management partners.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="how-it-works">
+        <div class="container">
+            <span class="section-badge">How It Works</span>
+            <h2 class="section-title">Four Simple Steps to Make a Difference</h2>
+            <p class="section-description">Getting started with Waste to Wealth is easy. Follow these simple steps and
+                start your sustainability journey today.</p>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-icon-wrapper">
+                        <div class="step-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24"
+                                fill="none" stroke="white" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" aria-hidden="true">
+                                <path
+                                    d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z">
+                                </path>
+                                <circle cx="12" cy="13" r="3"></circle>
+                            </svg>
+
+                        </div>
+                        <div class="step-number">01</div>
+                    </div>
+                    <h3>Scan Your Waste</h3>
+                    <p>Use our AI-powered app to scan your waste, the AI checks whether the waste is organic.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-icon-wrapper">
+                        <div class="step-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24"
+                                fill="none" stroke="white" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" aria-hidden="true">
+                                <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path>
+                                <path d="M15 18H9"></path>
+                                <path
+                                    d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14">
+                                </path>
+                                <circle cx="17" cy="18" r="2"></circle>
+                                <circle cx="7" cy="18" r="2"></circle>
+                            </svg>
+
+                        </div>
+                        <div class="step-number">02</div>
+                    </div>
+                    <h3>Schedule a Pickup</h3>
+                    <p>Choose a convenient time and confirm the pickup from your home with just one click.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-icon-wrapper">
+                        <div class="step-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24"
+                                fill="none" stroke="white" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-leaf h-10 w-10 text-white"
+                                aria-hidden="true">
+                                <path
+                                    d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z">
+                                </path>
+                                <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path>
+                            </svg>
+
+                        </div>
+                        <div class="step-number">03</div>
+                    </div>
+                    <h3>Convert to Compost</h3>
+                    <p>Organic waste is collected, processed, and transformed into nutrient-rich compost.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-icon-wrapper">
+                        <div class="step-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24"
+                                fill="none" stroke="white" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="8" cy="8" r="6"></circle>
+                                <path d="M18.09 10.37A6 6 0 1 1 10.34 18"></path>
+                                <path d="M7 6h1v4"></path>
+                                <path d="m16.71 13.88.7.71-2.82 2.82"></path>
+                            </svg>
+
+                        </div>
+                        <div class="step-number">04</div>
+                    </div>
+                    <h3>Sell & Earn Rewards</h3>
+                    <p>Farmers can buy the compost at affordable prices from our platform, and households earn rewards
+                        for every contribution.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Impact Section -->
+    <section id="impact" class="impact">
+        <div class="container">
+            <div class="impact-content">
+                <div class="impact-image">
+                    <img src="images/waste-bins (2).png" alt="Three waste bins: Compost, Waste, and Recycle"
+                        class="impact-img">
+                </div>
+                <div class="impact-text">
+                    <span class="section-badge">Our Impact</span>
+                    <h2 class="section-title">Creating a Circular Economy</h2>
+                    <p class="section-description"></p> By collecting household waste and producing quality compost, we
+                    are
+                    closing the loop between urban homes and agricultural lands, reducing landfill waste and
+                    enriching soil.</p>
+                    <div class="impact-cards">
+                        <div class="impact-card">
+                            <div class="impact-icon" style="color: #22c55e;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"
+                                    fill="#00A63E" stroke="white" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" aria-hidden="true">
+                                    <path
+                                        d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z">
+                                    </path>
+                                    <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path>
+                                </svg>
+
+                            </div>
+                            <div class="impact-card-content">
+                                <div class="impact-card-title">2.5M Tons of Waste Recycled</div>
+                                <div class="impact-card-subtitle">+15% this month</div>
+                            </div>
+                        </div>
+                        <div class="impact-card">
+                            <div class="impact-icon" style="color: #3b82f6;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-users h-6 w-6" aria-hidden="true">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                    <path d="M16 3.128a4 4 0 0 1 0 7.744"></path>
+                                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                </svg>
+                            </div>
+                            <div class="impact-card-content">
+                                <div class="impact-card-title">50,000+ Active Community Members</div>
+                                <div class="impact-card-subtitle">+1,200 new users</div>
+                            </div>
+                        </div>
+                        <div class="impact-card">
+                            <div class="impact-icon" style="color: #a855f7;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-trending-up h-6 w-6"
+                                    aria-hidden="true">
+                                    <path d="M16 7h6v6"></path>
+                                    <path d="m22 7-8.5 8.5-5-5L2 17"></path>
+                                </svg>
+                            </div>
+                            <div class="impact-card-content">
+                                <div class="impact-card-title">$1.2M Rewards Distributed</div>
+                                <div class="impact-card-subtitle">+28% growth</div>
+                            </div>
+                        </div>
+                        <div class="impact-card">
+                            <div class="impact-icon" style="color: #f97316;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-globe h-6 w-6" aria-hidden="true">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
+                                    <path d="M2 12h20"></path>
+                                </svg>
+                            </div>
+                            <div class="impact-card-content">
+                                <div class="impact-card-title">150+ Cities Covered</div>
+                                <div class="impact-card-subtitle">5 continents</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Footer -->
+    <footer id="contact" class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="logo">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 32 32" fill="none">
+                            <!-- Darker green circular background (updated color) -->
+                            <circle cx="16" cy="16" r="15" fill="#00A63E" />
+
+                            <!-- White-edged leaf with padding (scaled and centered) -->
+                            <g transform="translate(3,3) scale(0.82)">
+                                <path
+                                    d="M15 25A7 7 0 0 1 13.8 11.1C19.5 10 21 9.48 23 7c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"
+                                    stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                                    fill="none" />
+                                <path d="M6 26c0-3 1.85-5.36 5.08-6C13.5 19.52 16 18 17 17" stroke="white"
+                                    stroke-width="2.5" stroke-linecap="round" str oke-linejoin="round" fill="none" />
+                            </g>
+                        </svg>
+                        <span>Waste to Wealth</span>
+                    </div>
+                    <p>Transforming waste into opportunity, one recycle at a time.</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Company</h4>
+                        <ul>
+                            <li><a href="#">About Us</a></li>
+                            <li><a href="#">Careers</a></li>
+                            <li><a href="#">Blog</a></li>
+                            <li><a href="#">Press</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Resources</h4>
+                        <ul>
+                            <li><a href="#">Help Center</a></li>
+                            <li><a href="#">Community</a></li>
+                            <li><a href="#">Partners</a></li>
+                            <li><a href="#">Sustainability</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Legal</h4>
+                        <ul>
+                            <li><a href="#">Privacy Policy</a></li>
+                            <li><a href="#">Terms of Service</a></li>
+                            <li><a href="#">Cookie Policy</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Waste to Wealth. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="./js/home.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Route Optimization - Admin Dashboard</title>
+  
+  <!-- Leaflet CSS (Free Open Source Map Library) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f8fafc;
+    }
+
+    .route-container {
+      padding: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .route-header {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .route-header h1 {
+      font-size: 28px;
+      color: #0f1724;
+      margin-bottom: 8px;
+    }
+
+    .route-header p {
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .route-layout {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 20px;
+    }
+
+    .map-wrapper {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    #map {
+      height: 600px;
+      width: 100%;
+    }
+
+    .map-controls {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 1000;
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-map {
+      background: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .btn-map:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    
+    .btn-optimize {
+      background: #00A63E;
+      color: white;
+    }
+
+    .btn-clear {
+      background: #ef4444;
+      color: white;
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .info-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .info-card h3 {
+      font-size: 16px;
+      color: #0f1724;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .metric {
+      background: #f8fafc;
+      padding: 12px;
+      border-radius: 8px;
+    }
+
+    .metric-label {
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 4px;
+    }
+
+    .metric-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0f1724;
+    }
+
+    .stop-list {
+      max-height: 340px;
+      overflow-y: auto;
+    }
+
+    .stop-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .stop-item:last-child { border-bottom: none; }
+
+    .stop-number {
+      width: 32px;
+      height: 32px;
+      background: #00A63E;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .stop-details {
+      flex: 1;
+    }
+
+    .stop-name {
+      font-weight: 600;
+      color: #0f1724;
+      font-size: 14px;
+    }
+
+    .stop-address {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    .loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255,255,255,0.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      border-radius: 12px;
+    }
+
+    .loading-overlay.active { display: flex; }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid #e2e8f0;
+      border-top-color: #00A63E;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #94a3b8;
+    }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+
+    .alert-info {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .alert-success {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .alert-error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    /* Custom Leaflet marker styles */
+    .custom-marker {
+      background: white;
+      border: 3px solid #00A63E;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: #00A63E;
+      font-size: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .optimized-marker {
+      background: #00A63E;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="route-container">
+    <!-- Header -->
+    <div class="route-header">
+      <h1>🗺️ Route Optimization</h1>
+      <p>Plan efficient pickup routes using AI-powered optimization</p>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="route-layout">
+      <!-- Map Section -->
+      <div class="map-wrapper">
+        <div class="map-controls">
+          <button class="btn-map btn-optimize" id="optimizeBtn" onclick="optimizeRoute()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            </svg>
+            Optimize Route
+          </button>
+          <button class="btn-map btn-clear" onclick="clearRoute()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+            Clear
+          </button>
+        </div>
+        
+        <div id="map"></div>
+        
+        <div class="loading-overlay" id="loadingOverlay">
+          <div class="spinner"></div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <!-- Metrics Card -->
+        <div class="info-card">
+          <h3>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            Route Metrics
+          </h3>
+          <div class="metric-grid">
+            <div class="metric">
+              <div class="metric-label">Total Stops</div>
+              <div class="metric-value" id="totalStops">0</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Distance</div>
+              <div class="metric-value" id="totalDistance">0 km</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Est. Time</div>
+              <div class="metric-value" id="estimatedTime">0 min</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Time Saved</div>
+              <div class="metric-value" id="timeSaved">0 min</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Route Order Card -->
+        <div class="info-card">
+          <h3>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            </svg>
+            Pickup Sequence
+          </h3>
+          <div class="stop-list" id="stopList">
+            <div class="empty-state">
+              Click "Optimize Route" to generate pickup sequence
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <script>
+    const API_BASE = 'http://localhost:5000/api';
+    const token = localStorage.getItem('token');
+    
+    let map;
+    let markers = [];
+    let routeLine;
+    let pickupLocations = [];
+
+    // Initialize map
+    function initMap() {
+      // Center on Belagavi, Karnataka
+      map = L.map('map').setView([15.860888802973438,74.50410617670109], 13);
+
+      // Add OpenStreetMap tiles (free!)
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+      }).addTo(map);
+
+      console.log('✅ Map initialized');
+    }
+
+    // Load pending pickups from backend
+    async function loadPickups() {
+      try {
+        const res = await fetch(`${API_BASE}/pickup/all`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (!res.ok) throw new Error('Failed to load pickups');
+
+        const pickups = await res.json();
+        
+        // Filter for pending/processing pickups
+        pickupLocations = pickups
+          .filter(p => p.status === 'pending' || p.status === 'processing')
+          .map(p => {
+            // Geocode address if lat/lon missing (sample coordinates for demo)
+            const lat = p.lat || (12.2958 + (Math.random() - 0.5) * 0.1);
+            const lon = p.lon || (76.6394 + (Math.random() - 0.5) * 0.1);
+            
+            return {
+              id: p._id,
+              name: p.userId?.name || 'Household',
+              address: p.address || 'No address',
+              lat,
+              lon,
+              quantity: p.quantity
+            };
+          });
+
+        if (pickupLocations.length === 0) {
+          alert('No pending pickups found. Add some test pickups first!');
+          return;
+        }
+
+        displayPickups(pickupLocations);
+        console.log(`✅ Loaded ${pickupLocations.length} pickups`);
+
+      } catch (error) {
+        console.error('Error loading pickups:', error);
+        // Demo data fallback
+        pickupLocations = [
+          { id: '1', name: 'Household A', lat: 12.2958, lon: 76.6394, address: 'MG Road, Mysuru', quantity: 3 },
+          { id: '2', name: 'Household B', lat: 12.3050, lon: 76.6500, address: 'Hebbal, Mysuru', quantity: 2.5 },
+          { id: '3', name: 'Household C', lat: 12.2800, lon: 76.6300, address: 'Jayalakshmipuram, Mysuru', quantity: 4 },
+          { id: '4', name: 'Household D', lat: 12.3100, lon: 76.6250, address: 'Gokulam, Mysuru', quantity: 1.5 },
+          { id: '5', name: 'Household E', lat: 12.2900, lon: 76.6550, address: 'Saraswathipuram, Mysuru', quantity: 3.5 }
+        ];
+        displayPickups(pickupLocations);
+      }
+    }
+
+    // Display pickups as markers on map
+    function displayPickups(locations) {
+      clearMarkers();
+
+      locations.forEach((loc, index) => {
+        const icon = L.divIcon({
+          html: `<div class="custom-marker">${index + 1}</div>`,
+          className: '',
+          iconSize: [36, 36]
+        });
+
+        const marker = L.marker([loc.lat, loc.lon], { icon })
+          .bindPopup(`
+            <strong>${loc.name}</strong><br>
+            ${loc.address}<br>
+            <em>${loc.quantity} kg</em>
+          `)
+          .addTo(map);
+
+        markers.push(marker);
+      });
+
+      // Fit map to show all markers
+      if (markers.length > 0) {
+        const group = L.featureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.1));
+      }
+
+      updateMetrics({ totalStops: locations.length });
+    }
+
+    // Optimize route using backend API
+    async function optimizeRoute() {
+      if (pickupLocations.length < 2) {
+        alert('Need at least 2 pickups to optimize route');
+        return;
+      }
+
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      loadingOverlay.classList.add('active');
+
+      try {
+        const res = await fetch(`${API_BASE}/pickup/optimize-route`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ locations: pickupLocations })
+        });
+
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(error.message || 'Optimization failed');
+        }
+
+        const result = await res.json();
+        
+        console.log('✅ Route optimized:', result);
+        
+        displayOptimizedRoute(result.optimizedOrder, result.metrics);
+        showSuccessMessage(`Route optimized using ${result.method === 'gemini' ? 'Gemini AI' : 'fallback algorithm'}!`);
+
+      } catch (error) {
+        console.error('Optimization error:', error);
+        alert('Route optimization failed: ' + error.message);
+      } finally {
+        loadingOverlay.classList.remove('active');
+      }
+    }
+
+    // Display optimized route on map
+    function displayOptimizedRoute(optimizedOrder, metrics) {
+      clearMarkers();
+      clearRoute();
+
+      // Draw route line
+      const coordinates = optimizedOrder.map(loc => [loc.lat, loc.lon]);
+      
+      routeLine = L.polyline(coordinates, {
+        color: '#00A63E',
+        weight: 4,
+        opacity: 0.7,
+        dashArray: '10, 10'
+      }).addTo(map);
+
+      // Add numbered markers
+      optimizedOrder.forEach((loc, index) => {
+        const icon = L.divIcon({
+          html: `<div class="custom-marker optimized-marker">${index + 1}</div>`,
+          className: '',
+          iconSize: [36, 36]
+        });
+
+        const marker = L.marker([loc.lat, loc.lon], { icon })
+          .bindPopup(`
+            <strong>Stop ${index + 1}: ${loc.name}</strong><br>
+            ${loc.address}<br>
+            <em>${loc.quantity} kg</em>
+          `)
+          .addTo(map);
+
+        markers.push(marker);
+      });
+
+      // Fit map to route
+      map.fitBounds(routeLine.getBounds().pad(0.1));
+
+      // Update UI
+      updateStopList(optimizedOrder);
+      updateMetrics(metrics);
+    }
+
+    // Update stop list in sidebar
+    function updateStopList(order) {
+      const container = document.getElementById('stopList');
+      container.innerHTML = order.map((loc, index) => `
+        <div class="stop-item">
+          <div class="stop-number">${index + 1}</div>
+          <div class="stop-details">
+            <div class="stop-name">${loc.name}</div>
+            <div class="stop-address">${loc.address} • ${loc.quantity} kg</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Update metrics
+    function updateMetrics(metrics) {
+      document.getElementById('totalStops').textContent = metrics.totalStops || pickupLocations.length;
+      document.getElementById('totalDistance').textContent = `${metrics.totalDistance || 0} km`;
+      document.getElementById('estimatedTime').textContent = `${metrics.estimatedTime || 0} min`;
+      document.getElementById('timeSaved').textContent = `${metrics.timeSaved || 0} min`;
+    }
+
+    // Clear markers
+    function clearMarkers() {
+      markers.forEach(m => map.removeLayer(m));
+      markers = [];
+    }
+
+    // Clear route
+    function clearRoute() {
+      if (routeLine) {
+        map.removeLayer(routeLine);
+        routeLine = null;
+      }
+      displayPickups(pickupLocations);
+      document.getElementById('stopList').innerHTML = '<div class="empty-state">Click "Optimize Route" to generate pickup sequence</div>';
+    }
+
+    // Show success message
+    function showSuccessMessage(msg) {
+      // Add toast notification (optional)
+      console.log('✅', msg);
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      initMap();
+      loadPickups();
+    });
+  </script>
+</body>
+</html>
