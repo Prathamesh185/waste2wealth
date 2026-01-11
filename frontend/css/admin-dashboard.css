@@ -1247,6 +1247,8 @@ tr:last-child {
     }
 
     .metric-value {
+        display: flex;
+        justify-content: center;
         font-size: 18px;
     }
 

@@ -267,11 +267,12 @@ async function handlePickupRequest(e) {
 			isWasteOrganic = false;
 		}
 
-		// ✅ RESET SUBMIT BUTTON
+		// ✅ RESET SUBMIT BUTTON (Stay enabled for optional classification)
 		const submitBtn = document.querySelector('#pickupForm button[type="submit"]');
 		if (submitBtn) {
-			submitBtn.disabled = true;
-			submitBtn.textContent = 'Classify waste first';
+			submitBtn.disabled = false;
+			submitBtn.textContent = 'Schedule Pickup';
+			submitBtn.style.background = 'var(--primary-green)';
 		}
 
 		// ✅ CLEAR AI RESULT

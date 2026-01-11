@@ -1,17 +1,28 @@
 let mobilenetModel = null;
 let modelLoaded = false;
+let modelLoadingPromise = null; // Check for concurrent loads
 let isWasteOrganic = false;
 
 async function loadModel() {
-  try {
-    mobilenetModel = await mobilenet.load();
-    modelLoaded = true;
-    console.log('✅ MobileNet loaded');
-    showToast('AI model ready', 'success');
-  } catch (err) {
-    console.error('Error loading MobileNet', err);
-    showToast('AI model failed to load', 'error');
-  }
+  if (modelLoaded) return;
+  if (modelLoadingPromise) return modelLoadingPromise;
+
+  modelLoadingPromise = (async () => {
+    try {
+      // console.log('⏳ Loading MobileNet...');
+      mobilenetModel = await mobilenet.load();
+      modelLoaded = true;
+      console.log('✅ MobileNet loaded');
+      showToast('AI model ready', 'success');
+    } catch (err) {
+      console.error('Error loading MobileNet', err);
+      showToast('AI model failed to load', 'error');
+      modelLoadingPromise = null; // Enable retry
+      throw err;
+    }
+  })();
+
+  return modelLoadingPromise;
 }
 
 async function onClassifyClick() {
@@ -191,13 +202,11 @@ async function classifyFile(file) {
     resultBox.innerHTML = `
       <div class="ai-result-card ${verdictClass}">
         <p><strong>Verdict:</strong> ${verdict}</p>
-        <p>${message}</p>
+        <!-- <p>${message}</p>--> 
         <p class="muted">Confidence: ${(confidence * 100).toFixed(0)}%</p>
-        <details style="margin-top:8px;">
-          <summary style="cursor:pointer;color:#64748b;font-size:12px;">Show AI predictions</summary>
-          <p class="muted" style="margin-top:4px;font-size:11px;">
-            ${topk.slice(0, 5).map(p => `${p.className} (${(p.probability * 100).toFixed(0)}%)`).join(', ')}
-          </p>
+        <!-- <details style="margin-top:8px;">--> 
+        <!-- <summary style="cursor:pointer;color:#64748b;font-size:12px;">Show AI predictions</summary>-->  
+        <!--  <p class="muted" style="margin-top:4px;font-size:11px;"> ${topk.slice(0, 5).map(p => `${p.className} (${(p.probability * 100).toFixed(0)}%)`).join(', ')} </p> --> 
         </details>
         <img src="${img.src}" width="220" style="margin-top:8px;border-radius:8px"/>
       </div>
