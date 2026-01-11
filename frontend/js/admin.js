@@ -55,6 +55,12 @@ async function validateAdminAuth() {
     return false;
   }
 
+  // ✅ BYPASS AUTH FOR DEMO ADMIN
+  if (currentUser.isDemo) {
+    console.log('⚡ Demo Admin detected: Bypassing auth check');
+    return true;
+  }
+
   // Verify token is still valid
   try {
     const res = await fetch(`${API_BASE}/users/me`, {
@@ -356,13 +362,47 @@ function getDemoPickups() {
       address: 'Sunrise Villas',
       pointsAwarded: 10,
       requestDate: new Date(today.getTime() - 172800000).toISOString()
+    },
+    {
+      _id: 'demo-p4',
+      household: 'Household Delta',
+      phone: '+91 90000 44444',
+      wasteType: 'Garden Waste',
+      quantity: 6.2,
+      status: 'pending',
+      pickupDate: formatDate(today.toISOString()),
+      pickupTime: '09:00-12:00',
+      address: 'Blue Ridge Apartments',
+      requestDate: today.toISOString()
+    },
+    {
+      _id: 'demo-p5',
+      household: 'Household Epsilon',
+      phone: '+91 90000 55555',
+      wasteType: 'Kitchen Waste',
+      quantity: 1.8,
+      status: 'pending',
+      pickupDate: formatDate(today.toISOString()),
+      pickupTime: '12:00-15:00',
+      address: 'Silver Oak Society',
+      requestDate: today.toISOString()
     }
   ].map(normalisePickup);
 }
 
 async function refreshPickups() {
   try {
-    if (!token) throw new Error('demo');
+    if (!token && !currentUser.isDemo) throw new Error('demo');
+
+    // ✅ DEMO ADMIN: Return mock data immediately
+    if (currentUser.isDemo) {
+      state.pickups = getDemoPickups();
+      renderPickupTable();
+      renderPickupSnapshot();
+      updatePickupMetrics();
+      return;
+    }
+
     const res = await fetch(`${API_BASE}/pickup/all`, {
       headers: { Authorization: `Bearer ${token}` }
     });
@@ -441,7 +481,17 @@ function getDemoOrders() {
 
 async function refreshOrders() {
   try {
-    if (!token) throw new Error('demo');
+    if (!token && !currentUser.isDemo) throw new Error('demo');
+
+    // ✅ DEMO ADMIN: Return mock data immediately
+    if (currentUser.isDemo) {
+      state.orders = getDemoOrders();
+      renderOrderTable();
+      renderOrderSnapshot();
+      updateOrderMetrics();
+      return;
+    }
+
     const res = await fetch(`${API_BASE}/order/all`, {
       headers: { Authorization: `Bearer ${token}` }
     });
@@ -841,7 +891,7 @@ async function handleStockUpdate(event) {
 
   let shouldRefresh = true;
   try {
-    if (!token) throw new Error('demo');
+    if (currentUser.isDemo) throw new Error('demo'); // Added demo check
     const res = await fetch(`${API_BASE}/compost/stock`, {
       method: 'PUT',
       headers: {
@@ -885,69 +935,72 @@ function handleCompostImageChange(event) {
   reader.readAsDataURL(file);
 }
 
-async function handleInventorySave(event) {
-  event.preventDefault();
+async function handleInventorySave(e) {
+  e.preventDefault();
   const name = document.getElementById('compostName')?.value.trim();
-  const category = document.getElementById('compostCategory')?.value.trim() || 'general';
-  const price = Number(document.getElementById('compostPrice')?.value || 0);
-  const stock = Number(document.getElementById('compostStock')?.value || 0);
-  const image = document.getElementById('compostImageUrl')?.value.trim() || document.getElementById('compostImage')?.value.trim();
+  const category = document.getElementById('compostCategory')?.value.trim();
+  const price = document.getElementById('compostPrice')?.value;
+  const stock = document.getElementById('compostStock')?.value;
+  const image = document.getElementById('compostImageUrl')?.value || '';
 
-  if (!name || !price || !stock) {
-    showToast('Fill name, price and stock to add compost', 'error');
+  if (currentUser.isDemo) {
+    showToast('(Demo) Inventory saved successfully', 'success');
+    const existing = state.inventory.find(x => x.name === name);
+    if (existing) {
+      existing.category = category;
+      existing.pricePerKg = Number(price);
+      existing.stock = Number(stock);
+      existing.image = image;
+    } else {
+      state.inventory.unshift({ id: 'demo-inv-' + Date.now(), name, category, pricePerKg: Number(price), stock: Number(stock), image });
+    }
+    renderInventoryList();
+    updateDashboardMetrics();
+    // Close modal if open
+    const modal = document.getElementById('inventoryModal');
+    if (modal) modal.style.display = 'none';
+    if (e.target) e.target.reset();
     return;
   }
 
+  const payload = { name, category, pricePerKg: price, stock, image };
   const existing = state.inventory.find((item) => item.name.toLowerCase() === name.toLowerCase());
+  const method = existing ? 'PUT' : 'POST';
+  const url = existing && existing.id && !String(existing.id).startsWith('compost-')
+    ? `${API_BASE}/inventory/${existing.id}`
+    : `${API_BASE}/inventory`;
+
   try {
-    if (!token) throw new Error('no-token');
-    if (existing && existing.id && !String(existing.id).startsWith('compost-')) {
-      const res = await fetch(`${API_BASE}/inventory/${existing.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ name, category, pricePerKg: price, stock, image: image || '' })
-      });
-      const saved = await res.json();
-      if (!res.ok) throw new Error(saved.message || 'Update failed');
-      showToast('Compost updated');
-    } else {
-      const res = await fetch(`${API_BASE}/inventory`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ name, category, pricePerKg: price, stock, image: image || '' })
-      });
-      const saved = await res.json();
-      if (!res.ok) throw new Error(saved.message || 'Create failed');
-      showToast('Compost added');
-    }
-  } catch (_) {
-    // fallback to local
+    const res = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('Save failed');
+    showToast('Item saved successfully');
+
+    // Close modal
+    const modal = document.getElementById('inventoryModal');
+    if (modal) modal.style.display = 'none';
+
+    refreshInventory();
+  } catch (error) {
+    console.error(error);
+    showToast('Falling back to local save (Demo/Error)', 'warning');
+    // Local save fallback logic
     if (existing) {
       existing.category = category;
-      existing.pricePerKg = price;
-      existing.stock = stock;
-      if (image) existing.image = image;
-      showToast('Compost updated (local)');
+      existing.pricePerKg = Number(price);
+      existing.stock = Number(stock);
+      existing.image = image;
     } else {
-      state.inventory.unshift({ id: `compost-${Date.now()}`, name, category, pricePerKg: price, stock, image: image || '' });
-      showToast('Compost added (local)');
+      state.inventory.unshift({ id: 'local-' + Date.now(), name, category, pricePerKg: Number(price), stock: Number(stock), image });
     }
-    localStorage.setItem(STORAGE_KEYS.inventory, JSON.stringify(state.inventory));
+    renderInventoryList();
   }
-  event.target.reset();
-  const preview = document.getElementById('compostImagePreview');
-  if (preview) preview.innerHTML = '';
-  document.getElementById('compostImageUrl').value = '';
-  await refreshInventory();
-
-  // Trigger events for inventory updates
-  window.dispatchEvent(new StorageEvent('storage', {
-    key: 'admin_inventory_catalog',
-    newValue: JSON.stringify(state.inventory)
-  }));
-  window.dispatchEvent(new CustomEvent('inventoryUpdated', {
-    detail: { inventory: state.inventory }
-  }));
 }
 
 function handleRewardImageChange(event) {
@@ -966,69 +1019,67 @@ function handleRewardImageChange(event) {
   reader.readAsDataURL(file);
 }
 
-async function handleRewardSave(event) {
-  event.preventDefault();
+async function handleRewardSave(e) {
+  e.preventDefault();
   const title = document.getElementById('rewardTitle')?.value.trim();
-  const points = Number(document.getElementById('rewardPoints')?.value || 0);
-  const description = document.getElementById('rewardDescription')?.value.trim();
-  const image = document.getElementById('rewardImageUrl')?.value.trim() || document.getElementById('rewardImage')?.value.trim();
+  const points = document.getElementById('rewardPoints')?.value;
+  const desc = document.getElementById('rewardDescription')?.value;
+  const image = document.getElementById('rewardImageUrl')?.value || '';
 
-  if (!title || !points) {
-    showToast('Fill title and points to add reward', 'error');
+  if (currentUser.isDemo) {
+    showToast('(Demo) Reward saved successfully', 'success');
+    const existing = state.rewards.find(x => x.title === title);
+    if (existing) {
+      existing.points = Number(points);
+      existing.description = desc;
+      existing.image = image;
+    } else {
+      state.rewards.unshift({ id: 'demo-reward-' + Date.now(), title, points: Number(points), description: desc, image });
+    }
+    renderRewardList();
+    // Close modal if open
+    const modal = document.getElementById('rewardModal');
+    if (modal) modal.style.display = 'none';
+    if (e.target) e.target.reset();
     return;
   }
 
-  const existing = state.rewards.find((reward) => reward.title.toLowerCase() === title.toLowerCase());
+  const payload = { title, points, description: desc, image };
+  const existing = state.rewards.find((item) => item.title.toLowerCase() === title.toLowerCase());
+  const method = existing ? 'PUT' : 'POST';
+  const url = existing && existing.id && !String(existing.id).startsWith('reward-')
+    ? `${API_BASE}/rewards/${existing.id}`
+    : `${API_BASE}/rewards`;
+
   try {
-    if (!token) throw new Error('no-token');
-    if (existing && existing.id && !String(existing.id).startsWith('reward-')) {
-      const res = await fetch(`${API_BASE}/rewards/${existing.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ title, points, description, image: image || '' })
-      });
-      const saved = await res.json();
-      if (!res.ok) throw new Error(saved.message || 'Update failed');
-      showToast('Reward updated');
-    } else {
-      const res = await fetch(`${API_BASE}/rewards`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ title, points, description, image: image || '' })
-      });
-      const saved = await res.json();
-      if (!res.ok) throw new Error(saved.message || 'Create failed');
-      showToast('Reward added');
-    }
-  } catch (_) {
-    // fallback to local
+    const res = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('Save failed');
+    showToast('Reward saved successfully');
+
+    const modal = document.getElementById('rewardModal');
+    if (modal) modal.style.display = 'none';
+
+    refreshRewards();
+  } catch (error) {
+    console.error(error);
+    showToast('Falling back to local save (Demo/Error)', 'warning');
+    // Local fallback
     if (existing) {
-      existing.points = points;
-      existing.description = description;
-      if (image) existing.image = image;
-      showToast('Reward updated (local)');
+      existing.points = Number(points);
+      existing.description = desc;
+      existing.image = image;
     } else {
-      state.rewards.unshift({ id: `reward-${Date.now()}`, title, points, description, image: image || '' });
-      showToast('Reward added (local)');
+      state.rewards.unshift({ id: 'local-reward-' + Date.now(), title, points: Number(points), description: desc, image });
     }
-    localStorage.setItem(STORAGE_KEYS.rewards, JSON.stringify(state.rewards));
+    renderRewardList();
   }
-  event.target.reset();
-  const preview = document.getElementById('rewardImagePreview');
-  if (preview) preview.innerHTML = '';
-  document.getElementById('rewardImageUrl').value = '';
-  await refreshRewards();
-
-  // Trigger storage event for other tabs/windows and custom event for same window
-  window.dispatchEvent(new StorageEvent('storage', {
-    key: 'admin_reward_catalog',
-    newValue: JSON.stringify(state.rewards)
-  }));
-
-  // Also dispatch custom event for same-window listeners
-  window.dispatchEvent(new CustomEvent('rewardsUpdated', {
-    detail: { rewards: state.rewards }
-  }));
 }
 
 async function removeInventoryItem(id) {
@@ -1205,7 +1256,35 @@ async function loadPickupsForRouting() {
   overlay.classList.add('active');
 
   try {
-    if (!token) throw new Error('demo');
+    if (!token && !currentUser.isDemo) throw new Error('demo');
+
+    // ✅ DEMO MODE: Use local state if available, or generate fresh
+    if (currentUser.isDemo) {
+      const source = (state.pickups && state.pickups.length) ? state.pickups : getDemoPickups();
+
+      if (!source || source.length === 0) {
+        throw new Error('No demo data available');
+      }
+
+      pickupLocations = source
+        .filter(p => !p.status || p.status === 'pending' || p.status === 'processing') // Relaxed filter for demo
+        .map(p => ({
+          id: p._id,
+          name: p.household || 'Household',
+          address: p.address || 'Address not provided',
+          lat: p.lat || (16.29 + Math.random() * 0.02), // Mock coords if missing
+          lon: p.lon || (74.52 + Math.random() * 0.02),
+          quantity: p.quantity || 0,
+          phone: p.phone || '',
+          wasteType: p.wasteType || 'Mixed Organic',
+          pickupDate: p.pickupDate,
+          pickupTime: p.pickupTime
+        }));
+
+      displayLocationsOnMap(pickupLocations, 'pickup');
+      showToast(`Loaded ${pickupLocations.length} pickups (Demo)`);
+      return;
+    }
 
     const res = await fetch(`${API_BASE}/pickup/all`, {
       headers: { Authorization: `Bearer ${token}` }
@@ -1238,7 +1317,7 @@ async function loadPickupsForRouting() {
 
     if (pickupLocations.length === 0) {
       showToast('No pending pickups found', 'error');
-      displayDemoPickups();
+      // displayDemoPickups(); // Don't auto-fallback to hardcoded demo in real mode unless requested
       return;
     }
 
@@ -1246,10 +1325,13 @@ async function loadPickupsForRouting() {
     showToast(`Loaded ${pickupLocations.length} pickups`);
 
   } catch (error) {
-    console.warn('⚠️ Using demo pickup data:', error.message);
-    displayDemoPickups();
+    console.warn('⚠️ Error loading pickups:', error.message);
+    if (!currentUser.isDemo) {
+      // Only fallback to hardcoded demo display if NOT in demo mode (unexpected error)
+      displayDemoPickups();
+    }
   } finally {
-    overlay.classList.remove('active');
+    if (overlay) overlay.classList.remove('active');
   }
 }
 
@@ -1402,8 +1484,49 @@ async function optimizeCurrentRoute() {
 
   // ✅ VISUAL FEEDBACK
   showToast('Optimizing route, please wait...', 'info');
+
+  // Fix overlay reference
   const overlay = document.getElementById('routeLoadingOverlay');
   if (overlay) overlay.style.display = 'flex';
+
+  // ✅ MOCK OPTIMIZATION FOR DEMO ADMIN
+  if (currentUser.isDemo) {
+    setTimeout(() => {
+      // Use greedy approach (mocked) or pre-calculated
+      // Simple sort by distance from depot
+      const sorted = [...locations].sort((a, b) => {
+        const distA = calculateDistance(COMPOST_CENTER, a);
+        const distB = calculateDistance(COMPOST_CENTER, b);
+        return distA - distB;
+      });
+
+      const depotEnd = { ...COMPOST_CENTER };
+      // ✅ FIX: Start with Depot (Index 0), then sorted stops, then Depot End
+      const optimizedOrder = [COMPOST_CENTER, ...sorted, depotEnd];
+
+      const totalDistance = calculateTotalDistance(optimizedOrder);
+      const totalTime = Math.round((totalDistance / 30) * 60 + (sorted.length * 15)); // Mock time
+
+      const result = {
+        optimizedOrder: optimizedOrder,
+        metrics: {
+          totalDistance: Math.round(totalDistance * 100) / 100,
+          estimatedTime: totalTime,
+          totalStops: optimizedOrder.length,
+          timeSaved: 25 // Fake saving
+        },
+        method: 'fallback',
+        reasoning: 'Demo Mode: Route optimized based on nearest location from center.'
+      };
+
+      optimizedRouteData = result;
+      displayOptimizedRoute(result.optimizedOrder, result.metrics, result.method);
+      updateRouteMethodInfo(result.method, result.reasoning);
+      showToast('Route optimized (Demo Mode)!');
+      if (overlay) overlay.style.display = 'none';
+    }, 1500); // Fake delay
+    return;
+  }
 
   try {
     // Add depot as first location
@@ -1579,7 +1702,7 @@ function updateRouteStopList(order) {
   container.innerHTML = order.map((loc, index) => {
     const isDepot = loc.isDepot;
     const bgColor = isDepot ? '#3b82f6' : (currentRouteType === 'pickup' ? '#00A63E' : '#f97316');
-    const label = isDepot ? (index === 0 ? 'START' : 'END') : index.toString();
+    const label = isDepot ? (index === 0 ? '0' : 'END') : index.toString();
 
     // Build details based on route type
     let details = '';

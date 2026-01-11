@@ -46,6 +46,30 @@ function redirectToDashboard(role) {
     }, 500); // Small delay to ensure alert is seen
 }
 
+// Demo Admin Login (Mock)
+function loginAsDemoAdmin() {
+    console.log('Logging in as Demo Admin...');
+
+    const demoUser = {
+        name: 'Demo Admin',
+        email: 'demo@admin.com',
+        role: 'admin',
+        isDemo: true // Flag for mocked actions
+    };
+
+    // Set dummy token and user
+    localStorage.setItem('token', 'demo_token_12345');
+    localStorage.setItem('user', JSON.stringify(demoUser));
+
+    // Redirect
+    window.location.href = 'admin-dashboard.html';
+}
+
+// Make globally available
+window.showRegister = showRegister;
+window.showLogin = showLogin;
+window.loginAsDemoAdmin = loginAsDemoAdmin;
+
 // Wait for DOM to load
 document.addEventListener('DOMContentLoaded', function () {
     console.log('DOM Content Loaded');

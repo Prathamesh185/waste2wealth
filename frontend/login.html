@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Organic Waste Collection System</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
     <div class="container">
         <div class="auth-container">
@@ -20,6 +22,12 @@
                     <button type="submit">Login</button>
                 </form>
                 <p>Don't have an account? <a href="#" onclick="showRegister()">Register</a></p>
+
+                <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
+                    <button onclick="loginAsDemoAdmin()" style="background-color: #f59e0b; color: white;">⚡ Login as
+                         Admin (Demo)</button>
+                    <p style="font-size: 12px; color: #6b7280; margin-top: 8px;">View-only mode for demonstrations</p>
+                </div>
             </div>
 
             <!-- Register Form -->
@@ -47,4 +55,5 @@
     <!-- Use relative path for script so it works under varied base paths -->
     <script src="./js/auth.js"></script>
 </body>
+
 </html>
