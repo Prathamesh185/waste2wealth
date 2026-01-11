@@ -728,7 +728,7 @@ body {
 }
 
 .stat-value span:first-child {
-    font-size: 28px;
+    font-size: 20px;
     font-weight: 700;
     color: var(--dark-gray);
 }
@@ -812,7 +812,7 @@ body {
     padding: 24px;
     border-radius: var(--border-radius);
     transition: var(--transition);
-    border: 1px solid #e5e7eb;
+    border: 1px solid #caced8;
 }
 
 .feature-card:hover {
@@ -858,6 +858,7 @@ body {
 
 .step-card {
     text-align: center;
+    margin: 10px;
 }
 
 .step-icon-wrapper {
@@ -928,7 +929,7 @@ body {
     margin-top: 41px;
     width: 100%;
     height: 530px;
-    object-fit: cover;
+    object-fit: contain;
     border-radius: var(--border-radius);
 }
 
@@ -1043,7 +1044,7 @@ body {
     .hero-content,
     .impact-content {
         grid-template-columns: 1fr;
-        gap: 30px;
+        gap: 20px;
     }
 
     .features-grid {
@@ -1323,69 +1324,72 @@ body {
 
     .step-card p {
         font-size: 14px;
-    }
-
-    .step-number {
-        width: 36px;
-        height: 36px;
-        font-size: 14px;
-    }
-
-    .impact {
-        padding: 50px 0;
-    }
-
-    .impact-content {
-        gap: 24px;
-    }
-
-    .impact-img {
-        height: 250px;
-    }
-
-    .impact-cards {
-        gap: 12px;
-    }
-
-    .impact-card {
-        gap: 12px;
-        padding: 12px;
-    }
-
-    .impact-card-title {
-        font-size: 14px;
-    }
-
-    .impact-card-subtitle {
-        font-size: 12px;
-    }
-
-    .footer {
-        padding: 40px 0 20px;
-    }
-
-    .footer-brand p {
-        font-size: 13px;
-        line-height: 1.6;
-    }
-
-    .footer-column h4 {
-        font-size: 16px;
-        margin-bottom: 16px;
-    }
-
-    .footer-column a {
-        font-size: 13px;
-    }
-
-    .footer-bottom {
-        font-size: 12px;
+        padding: 0px 42px;
     }
 }
+
+.step-number {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+}
+
+.impact {
+    padding: 50px 0;
+}
+
+.impact-content {
+    gap: 24px;
+}
+
+.impact-img {
+    height: 570px;
+}
+
+.impact-cards {
+    gap: 12px;
+}
+
+.impact-card {
+    gap: 12px;
+    padding: 12px;
+}
+
+.impact-card-title {
+    font-size: 14px;
+}
+
+.impact-card-subtitle {
+    font-size: 12px;
+}
+
+.footer {
+    padding: 40px 0 20px;
+}
+
+.footer-brand p {
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.footer-column h4 {
+    font-size: 16px;
+    margin-bottom: 16px;
+}
+
+.footer-column a {
+    font-size: 13px;
+}
+
+.footer-bottom {
+    font-size: 12px;
+}
+
 
 @media (max-width: 480px) {
     .container {
         padding: 0 12px;
+        margin: 0px 7px;
     }
 
     .navbar .container {
@@ -1515,7 +1519,7 @@ body {
         gap: 8px;
     }
 
-        .overlay-stats {
+    .overlay-stats {
         bottom: 8px;
         left: 35px;
         right: 35px;
@@ -1545,11 +1549,13 @@ body {
         order: -1;
     }
 }
+
 @media (max-width: 768px) {
     .hero-content {
         text-align: center;
     }
 }
+
 @media (max-width: 768px) {
     .hero-img {
         max-height: 320px;
@@ -1566,7 +1572,8 @@ body {
     }
 
     .hero-text {
-        display: contents; /* allows child reordering */
+        display: contents;
+        /* allows child reordering */
     }
 
     .hero-image {
@@ -1603,7 +1610,7 @@ body {
 /* Placeholder for images */
 .hero-img,
 .impact-img {
-    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
     position: relative;
 }
 
@@ -1639,15 +1646,32 @@ body {
     }
 
     .impact-img {
-        width: 200px;
+        width: 300px;
         margin: 0 auto;
     }
 
     .section-description {
         text-align: center;
-        margin-top: 10px;
+        margin: 30px 0px;
     }
 }
 
+/* Mobile view */
+/* Hide new image on PC */
+.mobile-only {
+    display: none;
+}
 
+/* Mobile view */
+@media (max-width: 768px) {
+    /* Show new image */
+    .mobile-only {
+        display: block;
+        margin: 1rem 0;
+    }
 
+    /* Hide old image */
+    .impact-content > .impact-image {
+        display: none;
+    }
+}

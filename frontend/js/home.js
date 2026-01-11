@@ -19,20 +19,31 @@ const navActions = document.querySelector('.nav-actions');
 
 // Add mobile menu functionality
 function initMobileMenu() {
+    const existingBtn = document.querySelector('.mobile-menu-btn');
+
     if (window.innerWidth <= 768) {
-        // Create mobile menu button if it doesn't exist
-        if (!document.querySelector('.mobile-menu-btn')) {
+        // Create button only for mobile
+        if (!existingBtn) {
             const menuBtn = document.createElement('button');
             menuBtn.className = 'mobile-menu-btn';
             menuBtn.innerHTML = '☰';
-            menuBtn.style.cssText = 'background: none; border: none; font-size: 24px; cursor: pointer; color: var(--dark-gray);';
+            menuBtn.style.cssText =
+                'background:none;border:none;font-size:24px;cursor:pointer;color:var(--dark-gray);';
+
             menuBtn.addEventListener('click', () => {
                 navLinks.classList.toggle('active');
             });
+
             navActions.parentElement.insertBefore(menuBtn, navActions);
+        }
+    } else {
+        // Remove button on desktop
+        if (existingBtn) {
+            existingBtn.remove();
         }
     }
 }
+
 
 // Initialize on load and resize
 initMobileMenu();

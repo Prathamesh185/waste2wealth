@@ -1641,7 +1641,9 @@ body {
     }
 
     .metric-value {
+        display: flex;
         font-size: 18px;
+        justify-content: center;
     }
 
     .metric-info h3 {
