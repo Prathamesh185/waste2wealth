@@ -1,6 +1,6 @@
 let mobilenetModel = null;
 let modelLoaded = false;
-let isWasteOrganic = false; 
+let isWasteOrganic = false;
 
 async function loadModel() {
   try {
@@ -25,7 +25,7 @@ async function onClassifyClick() {
 async function classifyFile(file) {
   const resultBox = document.getElementById('aiResult');
   resultBox.innerHTML = 'Analyzing...';
-  
+
   const submitBtn = document.querySelector('#pickupForm button[type="submit"]');
   if (submitBtn) {
     submitBtn.disabled = true;
@@ -39,7 +39,7 @@ async function classifyFile(file) {
 
   const img = document.createElement('img');
   img.src = URL.createObjectURL(file);
-  try { await img.decode(); } catch (e) {}
+  try { await img.decode(); } catch (e) { }
 
   try {
     const predictions = await mobilenetModel.classify(img, 10); // Get top 10 instead of 5
@@ -48,18 +48,18 @@ async function classifyFile(file) {
     // 🔥 IMPROVED KEYWORD LISTS
     const compostKeywords = [
       // Fruits
-      'banana', 'apple', 'orange', 'lemon', 'mango', 'pear', 'pineapple', 
+      'banana', 'apple', 'orange', 'lemon', 'mango', 'pear', 'pineapple',
       'strawberry', 'grapes', 'watermelon', 'peach', 'plum', 'kiwi',
-      
+
       // Vegetables
       'vegetable', 'potato', 'tomato', 'cabbage', 'onion', 'carrot',
       'broccoli', 'cauliflower', 'cucumber', 'lettuce', 'spinach', 'pepper',
       'squash', 'zucchini', 'eggplant', 'pumpkin', 'corn', 'mushroom',
-      
+
       // Food waste
       'food', 'salad', 'pizza', 'sandwich', 'bread', 'rice', 'pasta',
       'soup', 'meal', 'dish', 'plate', 'bowl',
-      
+
       // Natural materials
       'leaf', 'leaves', 'plant', 'flower', 'grass', 'twig', 'bark',
       'peel', 'shell', 'seed', 'nut', 'egg', 'coffee', 'tea'
@@ -69,10 +69,10 @@ async function classifyFile(file) {
       // Plastics
       'plastic', 'bottle', 'wrapper', 'bag', 'container', 'package',
       'styrofoam', 'foam', 'packaging',
-      
+
       // Metals & Glass
       'can', 'metal', 'glass', 'jar', 'aluminum', 'steel', 'tin',
-      
+
       // Electronics & Products
       'phone', 'remote', 'toy', 'tool', 'utensil', 'cup', 'mug',
       'plate', 'fork', 'spoon', 'knife', 'screwdriver', 'hammer',
@@ -80,7 +80,7 @@ async function classifyFile(file) {
     ];
 
     const recycleKeywords = [
-      'paper', 'cardboard', 'newspaper', 'book', 'magazine', 
+      'paper', 'cardboard', 'newspaper', 'book', 'magazine',
       'box', 'carton', 'envelope', 'notebook'
     ];
 
@@ -91,11 +91,11 @@ async function classifyFile(file) {
     topk.forEach((pred, index) => {
       const label = (pred.className || '').toLowerCase();
       const p = pred.probability || 0;
-      
+
       // Weight higher predictions more heavily
       const weight = 1 / (index + 1); // First prediction gets full weight, second gets 0.5, etc.
       const weightedScore = p * weight;
-      
+
       const clean = label.replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim();
 
       // Check for exact matches
@@ -119,7 +119,7 @@ async function classifyFile(file) {
         /banana|apple|orange|potato|tomato|onion|carrot|cabbage/,
         /salad|meal|dish|leftover|scrap|compost/
       ];
-      
+
       const nonOrganicPatterns = [
         /bottle|can|plastic|glass|metal|package|wrapper/,
         /phone|remote|toy|tool|device|electronic/,
@@ -149,7 +149,7 @@ async function classifyFile(file) {
 
     // Require higher confidence threshold
     const CONFIDENCE_THRESHOLD = 0.55;
-    
+
     let verdict = 'Unknown';
     let message = '🤔 Not sure – try a clearer image or different angle.';
     let verdictClass = 'unknown';
@@ -176,7 +176,7 @@ async function classifyFile(file) {
       const topPred = topk[0];
       if (topPred.probability > 0.5) {
         const topLabel = topPred.className.toLowerCase();
-        
+
         // Strong food indicators
         if (/banana|apple|orange|broccoli|strawberry|lemon|mushroom/.test(topLabel)) {
           verdict = 'Compostable';
@@ -227,7 +227,7 @@ async function classifyFile(file) {
   } catch (err) {
     console.error('AI classify error', err);
     resultBox.innerHTML = '<p>❌ Error analyzing image</p>';
-    
+
     if (submitBtn) {
       submitBtn.disabled = true;
       submitBtn.textContent = 'Analysis failed - Try again';
@@ -237,3 +237,4 @@ async function classifyFile(file) {
 
 // ✅ EXPOSE FLAG GLOBALLY
 window.isWasteOrganic = () => isWasteOrganic;
+window.loadModel = loadModel;

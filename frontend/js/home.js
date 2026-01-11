@@ -34,7 +34,9 @@ function initMobileMenu() {
                 navLinks.classList.toggle('active');
             });
 
-            navActions.parentElement.insertBefore(menuBtn, navActions);
+           navActions.parentElement.prepend(menuBtn);
+
+
         }
     } else {
         // Remove button on desktop
@@ -43,45 +45,51 @@ function initMobileMenu() {
         }
     }
 }
+document.querySelector('.close-menu-btn').addEventListener('click', () => {
+    navLinks.classList.remove('active');
+});
+document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+        navLinks.classList.remove('active');
+    });
+});
+
 
 
 // Initialize on load and resize
 initMobileMenu();
 window.addEventListener('resize', initMobileMenu);
 
-// Scroll animations
+// Scroll animations (Re-trigger on every scroll)
 const observerOptions = {
-    threshold: 0.1,
+    threshold: 0.15, // Slightly higher threshold for better effect
     rootMargin: '0px 0px -50px 0px'
 };
 
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
+        // Toggle class to re-trigger animation every time it enters/leaves viewport
         if (entry.isIntersecting) {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
+            entry.target.classList.add('animate-in');
+        } else {
+            entry.target.classList.remove('animate-in');
         }
     });
 }, observerOptions);
 
-// Observe elements for fade-in animation
+// Observe elements
 document.addEventListener('DOMContentLoaded', () => {
     const animatedElements = document.querySelectorAll('.feature-card, .step-card, .impact-card');
-    animatedElements.forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(el);
-    });
+    animatedElements.forEach(el => observer.observe(el));
 });
 
 // Button click handlers
 document.querySelectorAll('.btn-primary, .btn-secondary').forEach(button => {
     button.addEventListener('click', function (e) {
-        if (!this.getAttribute('href')) {
-            e.preventDefault();
-            // Add your button functionality here
-            console.log('Button clicked:', this.textContent.trim());
+        if (!this.getAttribute('href') && !this.getAttribute('onclick')) {
+            // Only prevent default if it's a dummy button
+            // e.preventDefault(); 
+            // console.log('Button clicked:', this.textContent.trim());
         }
     });
 });
@@ -115,19 +123,22 @@ const statsObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
             const statNumber = entry.target;
-            const text = statNumber.textContent;
-            let target = 0;
+            // Only animate if not already done (optional, but stats usually run once)
+             if (!statNumber.classList.contains('counted')) {
+                const text = statNumber.textContent;
+                let target = 0;
 
-            if (text.includes('M')) {
-                target = parseFloat(text) * 1000000;
-            } else if (text.includes('K')) {
-                target = parseFloat(text) * 1000;
-            } else {
-                target = parseInt(text.replace(/\D/g, ''));
-            }
+                if (text.includes('M')) {
+                    target = parseFloat(text) * 1000000;
+                } else if (text.includes('K')) {
+                    target = parseFloat(text) * 1000;
+                } else {
+                    target = parseInt(text.replace(/\D/g, ''));
+                }
 
-            animateCounter(statNumber, target);
-            statsObserver.unobserve(statNumber);
+                animateCounter(statNumber, target);
+                statNumber.classList.add('counted');
+             }
         }
     });
 }, { threshold: 0.5 });

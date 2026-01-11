@@ -20,10 +20,10 @@ function showLogin() {
 // Redirect to appropriate dashboard
 function redirectToDashboard(role) {
     console.log('Redirecting to dashboard for role:', role);
-    
+
     let targetPage = '';
-    
-    switch(role) {
+
+    switch (role) {
         case 'household':
             targetPage = '/household-dashboard.html';
             break;
@@ -37,9 +37,9 @@ function redirectToDashboard(role) {
             alert('Invalid user role: ' + role);
             return;
     }
-    
+
     console.log('Redirecting to:', targetPage);
-    
+
     // Use window.location.href for redirection
     setTimeout(() => {
         window.location.href = targetPage;
@@ -47,65 +47,61 @@ function redirectToDashboard(role) {
 }
 
 // Wait for DOM to load
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('DOM Content Loaded');
-    
+
     // Check if user is already logged in
     const existingToken = localStorage.getItem('token');
     const existingUser = localStorage.getItem('user');
-    
+
     if (existingToken && existingUser) {
         console.log('User already logged in, redirecting...');
         const user = JSON.parse(existingUser);
         redirectToDashboard(user.role);
         return;
     }
-    
+
     // Login functionality
     const loginForm = document.getElementById('login');
     if (loginForm) {
         console.log('Login form found');
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            console.log('Login form submitted');
-            
+
+            const submitBtn = loginForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading-spinner"></span> Logging in...'; // Add loading state
+
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
-            
-            console.log('Attempting login with:', email);
-            
+
             try {
                 const response = await fetch(`${API_BASE}/auth/login`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
                 });
-                
-                console.log('Response status:', response.status);
-                
+
                 const data = await response.json();
-                console.log('Login response:', data);
-                
+
                 if (response.ok) {
                     // Store token and user data
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('user', JSON.stringify(data.user));
-                    
-                    console.log('Token stored:', data.token);
-                    console.log('User stored:', data.user);
-                    
-                    alert('Login successful! Redirecting to dashboard...');
-                    
-                    // Redirect based on role
+
+                    // Immediate redirect (No blocking alert)
                     redirectToDashboard(data.user.role);
                 } else {
                     alert(data.message || 'Login failed');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                alert('Login failed. Please check your connection and try again.');
+                alert('Login failed. Please check your connection.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
             }
         });
     } else {
@@ -119,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             console.log('Register form submitted');
-            
+
             const formData = {
                 name: document.getElementById('regName').value,
                 email: document.getElementById('regEmail').value,
@@ -128,9 +124,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 address: document.getElementById('regAddress').value,
                 phone: document.getElementById('regPhone').value
             };
-            
+
             console.log('Attempting registration with:', formData);
-            
+
             try {
                 const response = await fetch(`${API_BASE}/auth/register`, {
                     method: 'POST',
@@ -139,12 +135,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     body: JSON.stringify(formData)
                 });
-                
+
                 console.log('Response status:', response.status);
-                
+
                 const data = await response.json();
                 console.log('Registration response:', data);
-                
+
                 if (response.ok) {
                     alert('Registration successful! Please login.');
                     showLogin();

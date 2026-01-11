@@ -4,34 +4,34 @@ let currentUser = JSON.parse(localStorage.getItem('user') || 'null');
 
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Check if Leaflet is available
-    if (typeof L === 'undefined') {
-        console.error('❌ Leaflet library failed to load!');
-        console.log('Attempting to load Leaflet dynamically...');
-        
-        // Try loading it dynamically as fallback
-        const leafletCSS = document.createElement('link');
-        leafletCSS.rel = 'stylesheet';
-        leafletCSS.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-        document.head.appendChild(leafletCSS);
-        
-        const leafletJS = document.createElement('script');
-        leafletJS.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-        leafletJS.onload = () => {
-            console.log('✅ Leaflet loaded dynamically');
-        };
-        leafletJS.onerror = () => {
-            console.error('❌ Failed to load Leaflet dynamically');
-        };
-        document.head.appendChild(leafletJS);
-    } else {
-        console.log('✅ Leaflet loaded successfully');
-    }
+	// Check if Leaflet is available
+	if (typeof L === 'undefined') {
+		console.error('❌ Leaflet library failed to load!');
+		console.log('Attempting to load Leaflet dynamically...');
 
-    // Continue with rest of initialization
-    checkAuth();
-    setupEventListeners();
-    // ... rest of your code
+		// Try loading it dynamically as fallback
+		const leafletCSS = document.createElement('link');
+		leafletCSS.rel = 'stylesheet';
+		leafletCSS.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+		document.head.appendChild(leafletCSS);
+
+		const leafletJS = document.createElement('script');
+		leafletJS.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+		leafletJS.onload = () => {
+			console.log('✅ Leaflet loaded dynamically');
+		};
+		leafletJS.onerror = () => {
+			console.error('❌ Failed to load Leaflet dynamically');
+		};
+		document.head.appendChild(leafletJS);
+	} else {
+		console.log('✅ Leaflet loaded successfully');
+	}
+
+	// Continue with rest of initialization
+	checkAuth();
+	setupEventListeners();
+	// ... rest of your code
 });
 
 // Location Picker for Manual Selection
@@ -41,75 +41,75 @@ let selectedMarker = null;
 let selectedCoords = null;
 
 function showLocationPicker() {
-    // ✅ Check if Leaflet is loaded
-    if (typeof L === 'undefined') {
-        showToast('Map library not loaded. Please refresh the page.', 'error');
-        console.error('Leaflet (L) is not defined. Check if script loaded correctly.');
-        return;
-    }
+	// ✅ Check if Leaflet is loaded
+	if (typeof L === 'undefined') {
+		showToast('Map library not loaded. Please refresh the page.', 'error');
+		console.error('Leaflet (L) is not defined. Check if script loaded correctly.');
+		return;
+	}
 
-    const modal = document.getElementById('locationPickerModal');
-    if (!modal) {
-        console.error('Location picker modal not found');
-        return;
-    }
-    
-    modal.style.display = 'block';
-    
-    setTimeout(() => {
-        try {
-            if (!locationPickerMap) {
-                locationPickerMap = L.map('locationPickerMap').setView([15.860888802973438,74.50410617670109], 13);
-                
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors',
-                    maxZoom: 19
-                }).addTo(locationPickerMap);
-                
-                // Click to set location
-                locationPickerMap.on('click', function(e) {
-                    if (selectedMarker) {
-                        locationPickerMap.removeLayer(selectedMarker);
-                    }
-                    
-                    selectedCoords = e.latlng;
-                    selectedMarker = L.marker(selectedCoords).addTo(locationPickerMap);
-                    
-                    console.log('Selected coordinates:', selectedCoords);
-                });
-                
-                console.log('✅ Location picker map initialized');
-            } else {
-                locationPickerMap.invalidateSize();
-            }
-        } catch (error) {
-            console.error('Error initializing location picker:', error);
-            showToast('Failed to initialize map. Please try again.', 'error');
-        }
-    }, 100);
+	const modal = document.getElementById('locationPickerModal');
+	if (!modal) {
+		console.error('Location picker modal not found');
+		return;
+	}
+
+	modal.style.display = 'block';
+
+	setTimeout(() => {
+		try {
+			if (!locationPickerMap) {
+				locationPickerMap = L.map('locationPickerMap').setView([15.860888802973438, 74.50410617670109], 13);
+
+				L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+					attribution: '© OpenStreetMap contributors',
+					maxZoom: 19
+				}).addTo(locationPickerMap);
+
+				// Click to set location
+				locationPickerMap.on('click', function (e) {
+					if (selectedMarker) {
+						locationPickerMap.removeLayer(selectedMarker);
+					}
+
+					selectedCoords = e.latlng;
+					selectedMarker = L.marker(selectedCoords).addTo(locationPickerMap);
+
+					console.log('Selected coordinates:', selectedCoords);
+				});
+
+				console.log('✅ Location picker map initialized');
+			} else {
+				locationPickerMap.invalidateSize();
+			}
+		} catch (error) {
+			console.error('Error initializing location picker:', error);
+			showToast('Failed to initialize map. Please try again.', 'error');
+		}
+	}, 100);
 }
 
 function closeLocationPicker() {
-    const modal = document.getElementById('locationPickerModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
+	const modal = document.getElementById('locationPickerModal');
+	if (modal) {
+		modal.style.display = 'none';
+	}
 }
 
 function confirmLocation() {
-    if (!selectedCoords) {
-        showToast('Please click on the map to select a location', 'error');
-        return;
-    }
-    
-    // Store coordinates to be used in form submission
-    window.manualCoords = {
-        lat: selectedCoords.lat,
-        lon: selectedCoords.lng
-    };
-    
-    showToast('Location selected successfully!');
-    closeLocationPicker();
+	if (!selectedCoords) {
+		showToast('Please click on the map to select a location', 'error');
+		return;
+	}
+
+	// Store coordinates to be used in form submission
+	window.manualCoords = {
+		lat: selectedCoords.lat,
+		lon: selectedCoords.lng
+	};
+
+	showToast('Location selected successfully!');
+	closeLocationPicker();
 }
 
 // ✅ Make these functions global
@@ -124,7 +124,7 @@ function showToast(message, type = 'success') {
 	if (!container) return alert(message);
 	const el = document.createElement('div');
 	el.className = `toast ${type}`;
-	el.innerHTML = `<span style="font-weight:700;font-size:20px;">${type==='success'?'✓':'✕'}</span><span>${message}</span>`;
+	el.innerHTML = `<span style="font-weight:700;font-size:20px;">${type === 'success' ? '✓' : '✕'}</span><span>${message}</span>`;
 	container.appendChild(el);
 	setTimeout(() => { el.style.animation = 'slideOut 0.3s ease'; setTimeout(() => el.remove(), 300); }, 3000);
 }
@@ -157,10 +157,10 @@ function displayUserInfo(user) {
 // Load points from database
 async function loadPoints() {
 	try {
-		const res = await fetch(`${API_BASE_URL}/users/me`, { 
+		const res = await fetch(`${API_BASE_URL}/users/me`, {
 			headers: { Authorization: `Bearer ${token}` }
 		});
-		
+
 		if (!res.ok) {
 			if (res.status === 401) {
 				// Token expired or invalid
@@ -172,7 +172,7 @@ async function loadPoints() {
 			}
 			throw new Error('Failed to load user data');
 		}
-		
+
 		const data = await res.json();
 		currentUser = { ...currentUser, ...data };
 		localStorage.setItem('user', JSON.stringify(currentUser));
@@ -201,29 +201,35 @@ function showSection(section) {
 		loadRewards();
 		loadRedemptionHistory();
 	}
+
+	// ✅ PRELOAD AI MODEL
+	if (section === 'request-pickup' && window.loadModel) {
+		console.log('Preloading AI model...');
+		window.loadModel();
+	}
 }
 
 // Handle pickup request
 // Handle pickup request
 async function handlePickupRequest(e) {
 	e.preventDefault();
-	
-	// ✅ CHECK IF WASTE IS ORGANIC
-	if (!window.isWasteOrganic || !window.isWasteOrganic()) {
-		showToast('⚠️ Please classify your waste as organic before scheduling pickup', 'error');
-		return;
-	}
-	
+
+	// ✅ REMOVED MANDATORY AI CHECK
+	// if (!window.isWasteOrganic || !window.isWasteOrganic()) {
+	// 	showToast('⚠️ Please classify your waste as organic before scheduling pickup', 'error');
+	// 	return;
+	// }
+
 	const quantity = parseFloat(document.getElementById('quantity').value) || 0;
 	const wasteType = document.getElementById('wasteType').value;
 	const address = document.getElementById('address').value.trim();
 	const pickupDate = document.getElementById('pickupDate').value;
 	const pickupTime = document.getElementById('pickupTime').value;
 
-	if (quantity <= 0) return showToast('Enter valid quantity','error');
-	if (!wasteType) return showToast('Select waste type','error');
-	if (!address) return showToast('Enter address','error');
-	if (!pickupDate || !pickupTime) return showToast('Select date & time','error');
+	if (quantity <= 0) return showToast('Enter valid quantity', 'error');
+	if (!wasteType) return showToast('Select waste type', 'error');
+	if (!address) return showToast('Enter address', 'error');
+	if (!pickupDate || !pickupTime) return showToast('Select date & time', 'error');
 
 	const payload = {
 		quantity,
@@ -232,7 +238,7 @@ async function handlePickupRequest(e) {
 		pickupDate,
 		pickupTime
 	};
-	
+
 	if (window.manualCoords) {
 		payload.lat = window.manualCoords.lat;
 		payload.lon = window.manualCoords.lon;
@@ -241,42 +247,42 @@ async function handlePickupRequest(e) {
 
 	try {
 		const res = await fetch(`${API_BASE_URL}/pickup/request`, {
-			method:'POST',
-			headers:{ 
-				'Content-Type':'application/json', 
-				'Authorization': `Bearer ${token}` 
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${token}`
 			},
 			body: JSON.stringify(payload)
 		});
-		
+
 		const data = await res.json();
-		if (!res.ok) return showToast(data.message || 'Failed','error');
-		
+		if (!res.ok) return showToast(data.message || 'Failed', 'error');
+
 		showToast('Pickup requested successfully!');
 		document.getElementById('pickupForm').reset();
 		window.manualCoords = null;
-		
+
 		// ✅ RESET AI CLASSIFICATION FLAG
 		if (window.isWasteOrganic) {
 			isWasteOrganic = false;
 		}
-		
+
 		// ✅ RESET SUBMIT BUTTON
 		const submitBtn = document.querySelector('#pickupForm button[type="submit"]');
 		if (submitBtn) {
 			submitBtn.disabled = true;
 			submitBtn.textContent = 'Classify waste first';
 		}
-		
+
 		// ✅ CLEAR AI RESULT
 		const aiResult = document.getElementById('aiResult');
 		if (aiResult) {
 			aiResult.innerHTML = '';
 		}
-		
-		setTimeout(() => { 
-			showSection('dashboard'); 
-			loadRecentPickups(); 
+
+		setTimeout(() => {
+			showSection('dashboard');
+			loadRecentPickups();
 		}, 800);
 	} catch (err) {
 		console.error('Pickup request error:', err);
@@ -287,10 +293,10 @@ async function handlePickupRequest(e) {
 // Load recent pickups
 async function loadRecentPickups() {
 	try {
-		const res = await fetch(`${API_BASE_URL}/pickup/my`, { 
-			headers: { Authorization:`Bearer ${token}` }
+		const res = await fetch(`${API_BASE_URL}/pickup/my`, {
+			headers: { Authorization: `Bearer ${token}` }
 		});
-		
+
 		if (!res.ok) throw new Error('Failed to load pickups');
 		const pickups = await res.json();
 		renderRecentPickups(Array.isArray(pickups) ? pickups : []);
@@ -303,7 +309,7 @@ async function loadRecentPickups() {
 function renderRecentPickups(list) {
 	const container = document.getElementById('recentPickups');
 	if (!container) return;
-	const sorted = list.sort((a,b)=>new Date(b.requestDate)-new Date(a.requestDate)).slice(0,3);
+	const sorted = list.sort((a, b) => new Date(b.requestDate) - new Date(a.requestDate)).slice(0, 3);
 	if (!sorted.length) {
 		container.innerHTML = '<p class="empty-state">No pickups yet</p>';
 		return;
@@ -312,17 +318,17 @@ function renderRecentPickups(list) {
 		<div class="pickup-item">
 			<div class="pickup-details">
 				<div class="pickup-description">${new Date(p.requestDate).toLocaleDateString()}</div>
-				<div class="pickup-meta">${(p.quantity||0)} kg • ${p.status}</div>
+				<div class="pickup-meta">${(p.quantity || 0)} kg • ${p.status}</div>
 			</div>
 			${p.pointsAwarded ? `<div class="pickup-points">+${p.pointsAwarded} pts</div>` : ''}
 		</div>
 	`).join('');
 
 	// Metrics
-	const totalWaste = list.filter(p=>p.status==='completed').reduce((s,p)=>s+(p.quantity||0),0);
-	const completed = list.filter(p=>p.status==='completed').length;
+	const totalWaste = list.filter(p => p.status === 'completed').reduce((s, p) => s + (p.quantity || 0), 0);
+	const completed = list.filter(p => p.status === 'completed').length;
 	const co2 = (totalWaste * 0.8).toFixed(1);
-	const setText = (id,val)=>{const el=document.getElementById(id); if(el) el.textContent = val;};
+	const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
 	setText('metricWaste', `${totalWaste.toFixed(1)} kg`);
 	setText('metricPickups', completed);
 	setText('metricCO2', `${co2} kg`);
@@ -331,10 +337,10 @@ function renderRecentPickups(list) {
 // Load pickup history
 async function loadPickupHistory() {
 	try {
-		const res = await fetch(`${API_BASE_URL}/pickup/my`, { 
-			headers: { Authorization:`Bearer ${token}` }
+		const res = await fetch(`${API_BASE_URL}/pickup/my`, {
+			headers: { Authorization: `Bearer ${token}` }
 		});
-		
+
 		if (!res.ok) throw new Error('Failed to load history');
 		const pickups = await res.json();
 		renderHistory(Array.isArray(pickups) ? pickups : []);
@@ -348,14 +354,14 @@ function renderHistory(list) {
 	const upcoming = document.getElementById('upcomingPickups');
 	const past = document.getElementById('pastPickups');
 	if (!upcoming || !past) return;
-	
-	const future = list.filter(p=>p.status!=='completed' && p.status!=='rejected');
-	const done = list.filter(p=>p.status==='completed');
-	const rejected = list.filter(p=>p.status==='rejected');
-	
+
+	const future = list.filter(p => p.status !== 'completed' && p.status !== 'rejected');
+	const done = list.filter(p => p.status === 'completed');
+	const rejected = list.filter(p => p.status === 'rejected');
+
 	upcoming.innerHTML = future.length ? future.map(card).join('') : '<p class="empty-state">No upcoming pickups</p>';
 	past.innerHTML = (done.length || rejected.length) ? [...done, ...rejected].map(card).join('') : '<p class="empty-state">No past pickups</p>';
-	
+
 	function getStatusBadge(status) {
 		const statusLower = (status || 'pending').toLowerCase();
 		const badges = {
@@ -367,7 +373,7 @@ function renderHistory(list) {
 		};
 		return badges[statusLower] || badges.pending;
 	}
-	
+
 	function card(p) {
 		const status = p.status || 'pending';
 		const statusBadge = getStatusBadge(status);
@@ -376,8 +382,8 @@ function renderHistory(list) {
 			<div class="pickup-item">
 				<div class="pickup-details">
 					<div class="pickup-description">Request Date: ${requestDate}</div>
-					<div class="pickup-meta">${(p.quantity||0)} kg • ${p.wasteType || 'Mixed Organic Waste'}</div>
-					${p.pickupDate ? `<div class="pickup-meta">Scheduled: ${p.pickupDate} ${p.pickupTime||''}</div>` : ''}
+					<div class="pickup-meta">${(p.quantity || 0)} kg • ${p.wasteType || 'Mixed Organic Waste'}</div>
+					${p.pickupDate ? `<div class="pickup-meta">Scheduled: ${p.pickupDate} ${p.pickupTime || ''}</div>` : ''}
 					${p.address ? `<div class="pickup-meta" style="color:#6b7280;">Address: ${p.address}</div>` : ''}
 					<div style="margin-top:8px;">${statusBadge}</div>
 				</div>
@@ -419,23 +425,23 @@ async function loadRewards() {
 					image: r.image || ''
 				}));
 			}
-		} catch (_) {}
+		} catch (_) { }
 	}
 
 	const grid = document.getElementById('rewardsGrid');
 	if (!grid) return;
-	
+
 	if (rewards.length === 0) {
 		grid.innerHTML = '<div class="empty-state">No rewards available</div>';
 		return;
 	}
-	
+
 	grid.innerHTML = rewards.map(r => {
 		const title = (r.title || 'Reward').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 		const desc = (r.description || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 		const imageSrc = r.image || '';
 		const hasImage = imageSrc && imageSrc.trim() !== '';
-		
+
 		return `
 		<div class="reward-card">
 			${hasImage ? `<img src="${imageSrc}" alt="${title}" class="reward-image" onerror="this.style.display='none';" style="width:100%;height:200px;object-fit:cover;border-radius:12px 12px 0 0;">` : '<div class="reward-image-placeholder" style="width:100%;height:200px;background:#f3f4f6;border-radius:12px 12px 0 0;display:flex;align-items:center;justify-content:center;color:#9ca3af;">No Image</div>'}
@@ -443,7 +449,7 @@ async function loadRewards() {
 				<h3>${title}</h3>
 				${desc ? `<p style="color:#6b7280;font-size:14px;margin:8px 0;">${desc}</p>` : ''}
 				<div class="reward-cost"><span>${r.cost} pts</span></div>
-				<button class="reward-redeem-btn" onclick="redeemReward('${r.id}', ${r.cost})" ${(currentUser?.rewardPoints||0) < r.cost ? 'disabled':''}>Redeem</button>
+				<button class="reward-redeem-btn" onclick="redeemReward('${r.id}', ${r.cost})" ${(currentUser?.rewardPoints || 0) < r.cost ? 'disabled' : ''}>Redeem</button>
 			</div>
 		</div>
 		`;
@@ -453,7 +459,13 @@ async function loadRewards() {
 // Redeem reward - Database version
 async function redeemReward(id, cost) {
 	if (!confirm(`Redeem this reward for ${cost} points?`)) return;
-	if ((currentUser?.rewardPoints || 0) < cost) return showToast('Insufficient points','error');
+	// Check for insufficient points
+	const currentPoints = currentUser?.rewardPoints || 0;
+	if (currentPoints < cost) {
+		const diff = cost - currentPoints;
+		showToast(`Insufficient points: You need ${diff} more points to redeem this.`, 'error');
+		return;
+	}
 
 	try {
 		const res = await fetch(`${API_BASE_URL}/redemptions`, {
@@ -531,18 +543,18 @@ function setupEventListeners() {
 document.addEventListener('DOMContentLoaded', () => {
 	checkAuth();
 	setupEventListeners();
-	
+
 	// Listen for rewards updates from admin
-	window.addEventListener('storage', function(e) {
+	window.addEventListener('storage', function (e) {
 		if (e.key === 'admin_reward_catalog') {
 			loadRewards();
 		}
 	});
-	
-	window.addEventListener('rewardsUpdated', function(e) {
+
+	window.addEventListener('rewardsUpdated', function (e) {
 		loadRewards();
 	});
-	
+
 	showSection('dashboard');
 	loadRecentPickups();
 	loadRewards();
@@ -552,15 +564,15 @@ document.addEventListener('DOMContentLoaded', () => {
 document.addEventListener('DOMContentLoaded', () => {
 	checkAuth();
 	setupEventListeners();
-	
-	// ✅ INITIALIZE SUBMIT BUTTON AS DISABLED
+
+	// ✅ INITIALIZE SUBMIT BUTTON AS ENABLED (Optional Classification)
 	const submitBtn = document.querySelector('#pickupForm button[type="submit"]');
 	if (submitBtn) {
-		submitBtn.disabled = true;
-		submitBtn.textContent = '📸 Classify waste first';
-		submitBtn.style.background = '#94a3b8';
+		submitBtn.disabled = false;
+		submitBtn.textContent = 'Schedule Pickup';
+		submitBtn.style.background = 'var(--primary-green)';
 	}
-	
+
 	showSection('dashboard');
 	loadRecentPickups();
 	loadRewards();

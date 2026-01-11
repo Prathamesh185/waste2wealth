@@ -33,19 +33,19 @@ const state = {
   stock: { available: 0, pricePerKg: 0 }
 };
 document.addEventListener('DOMContentLoaded', async () => {
-    // Check if Leaflet is available
-    if (typeof L === 'undefined') {
-        console.error('❌ Leaflet library failed to load!');
-    } else {
-        console.log('✅ Leaflet loaded successfully');
-    }
+  // Check if Leaflet is available
+  if (typeof L === 'undefined') {
+    console.error('❌ Leaflet library failed to load!');
+  } else {
+    console.log('✅ Leaflet loaded successfully');
+  }
 
-    // Validate admin authentication
-    const isValid = await validateAdminAuth();
-    if (!isValid) return;
+  // Validate admin authentication
+  const isValid = await validateAdminAuth();
+  if (!isValid) return;
 
-    // Continue with initialization
-    await initAdminDashboard();
+  // Continue with initialization
+  await initAdminDashboard();
 });
 async function validateAdminAuth() {
   if (!token || !currentUser) {
@@ -66,7 +66,7 @@ async function validateAdminAuth() {
     }
 
     const userData = await res.json();
-    
+
     if (userData.role !== 'admin') {
       console.error('❌ User is not admin:', userData.role);
       alert('Admin access required');
@@ -77,7 +77,7 @@ async function validateAdminAuth() {
     // Update local user data
     currentUser = userData;
     localStorage.setItem('user', JSON.stringify(currentUser));
-    
+
     console.log('✅ Admin authentication validated');
     return true;
 
@@ -102,13 +102,13 @@ async function initAdminDashboard() {
   setupForms();
 
   await Promise.all([
-    refreshStock(), 
-    refreshPickups(), 
-    refreshOrders(), 
-    refreshInventory(), 
+    refreshStock(),
+    refreshPickups(),
+    refreshOrders(),
+    refreshInventory(),
     refreshRewards()
   ]);
-  
+
   updateDashboardMetrics();
   showSection('dashboard');
 }
@@ -119,7 +119,7 @@ function loadInventoryFromStorage() {
     if (Array.isArray(stored) && stored.length) {
       return stored;
     }
-  } catch (_) {}
+  } catch (_) { }
   localStorage.setItem(STORAGE_KEYS.inventory, JSON.stringify(DEFAULT_INVENTORY));
   return [...DEFAULT_INVENTORY];
 }
@@ -130,7 +130,7 @@ function loadRewardsFromStorage() {
     if (Array.isArray(stored) && stored.length) {
       return stored;
     }
-  } catch (_) {}
+  } catch (_) { }
   localStorage.setItem(STORAGE_KEYS.rewards, JSON.stringify(DEFAULT_REWARDS));
   return [...DEFAULT_REWARDS];
 }
@@ -497,12 +497,12 @@ function renderPickupTable() {
           <td>${formatKg(pickup.quantity)}</td>
           <td>${pickup.address || '--'}</td>
           <td>${pickupWindow}</td>
-          <td><span class="badge ${pickup.status}">${statusLabel(pickup.status)}</span></td>
           <td>
             <div class="action-buttons">
               ${pickupActionButtons(pickup)}
             </div>
           </td>
+          <td><span class="badge ${pickup.status}">${statusLabel(pickup.status)}</span></td>
         </tr>
       `;
     }).join('');
@@ -872,9 +872,9 @@ async function handleStockUpdate(event) {
 function handleCompostImageChange(event) {
   const file = event.target.files[0];
   if (!file) return;
-  
+
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = function (e) {
     const imageUrl = e.target.result;
     document.getElementById('compostImageUrl').value = imageUrl;
     const preview = document.getElementById('compostImagePreview');
@@ -939,7 +939,7 @@ async function handleInventorySave(event) {
   if (preview) preview.innerHTML = '';
   document.getElementById('compostImageUrl').value = '';
   await refreshInventory();
-  
+
   // Trigger events for inventory updates
   window.dispatchEvent(new StorageEvent('storage', {
     key: 'admin_inventory_catalog',
@@ -953,9 +953,9 @@ async function handleInventorySave(event) {
 function handleRewardImageChange(event) {
   const file = event.target.files[0];
   if (!file) return;
-  
+
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = function (e) {
     const imageUrl = e.target.result;
     document.getElementById('rewardImageUrl').value = imageUrl;
     const preview = document.getElementById('rewardImagePreview');
@@ -1018,13 +1018,13 @@ async function handleRewardSave(event) {
   if (preview) preview.innerHTML = '';
   document.getElementById('rewardImageUrl').value = '';
   await refreshRewards();
-  
+
   // Trigger storage event for other tabs/windows and custom event for same window
   window.dispatchEvent(new StorageEvent('storage', {
     key: 'admin_reward_catalog',
     newValue: JSON.stringify(state.rewards)
   }));
-  
+
   // Also dispatch custom event for same-window listeners
   window.dispatchEvent(new CustomEvent('rewardsUpdated', {
     detail: { rewards: state.rewards }
@@ -1047,7 +1047,7 @@ async function removeInventoryItem(id) {
     showToast('Compost removed (local)');
   }
   await refreshInventory();
-  
+
   // Trigger events for inventory updates
   window.dispatchEvent(new StorageEvent('storage', {
     key: 'admin_inventory_catalog',
@@ -1074,7 +1074,7 @@ async function removeRewardItem(id) {
     showToast('Reward removed (local)');
   }
   await refreshRewards();
-  
+
   // Trigger events for reward updates
   window.dispatchEvent(new StorageEvent('storage', {
     key: 'admin_reward_catalog',
@@ -1111,11 +1111,11 @@ const COMPOST_CENTER = {
 // Switch between pickup and delivery routes
 function switchRouteType(type) {
   currentRouteType = type;
-  
+
   document.querySelectorAll('.route-toggle-btn').forEach(btn => {
     btn.classList.toggle('active', btn.getAttribute('data-type') === type);
   });
-  
+
   if (type === 'pickup') {
     document.getElementById('routeSequenceTitle').textContent = 'Pickup Sequence';
     document.getElementById('routeMetricLabel').textContent = 'Time Saved';
@@ -1123,10 +1123,10 @@ function switchRouteType(type) {
     document.getElementById('routeSequenceTitle').textContent = 'Delivery Sequence';
     document.getElementById('routeMetricLabel').textContent = 'Total Load';
   }
-  
+
   clearCurrentRoute();
   loadCurrentRouteData();
-  
+
   console.log(`✅ Switched to ${type} routes`);
 }
 
@@ -1177,7 +1177,7 @@ function addDepotMarker() {
     iconSize: [48, 48]
   });
 
-  const depotMarker = L.marker([COMPOST_CENTER.lat, COMPOST_CENTER.lon], { 
+  const depotMarker = L.marker([COMPOST_CENTER.lat, COMPOST_CENTER.lon], {
     icon: depotIcon,
     zIndexOffset: 1000 // Keep depot on top
   })
@@ -1206,7 +1206,7 @@ async function loadPickupsForRouting() {
 
   try {
     if (!token) throw new Error('demo');
-    
+
     const res = await fetch(`${API_BASE}/pickup/all`, {
       headers: { Authorization: `Bearer ${token}` }
     });
@@ -1214,7 +1214,7 @@ async function loadPickupsForRouting() {
     if (!res.ok) throw new Error('Failed to load pickups');
 
     const pickups = await res.json();
-    
+
     pickupLocations = pickups
       .filter(p => {
         const hasStatus = p.status === 'pending' || p.status === 'processing';
@@ -1260,7 +1260,7 @@ async function loadDeliveriesForRouting() {
 
   try {
     if (!token) throw new Error('demo');
-    
+
     const res = await fetch(`${API_BASE}/order/all`, {
       headers: { Authorization: `Bearer ${token}` }
     });
@@ -1268,28 +1268,28 @@ async function loadDeliveriesForRouting() {
     if (!res.ok) throw new Error('Failed to load orders');
 
     const orders = await res.json();
-    
+
     console.log(`📦 Total orders fetched: ${orders.length}`);
-    
-    const eligibleOrders = orders.filter(o => 
+
+    const eligibleOrders = orders.filter(o =>
       o.status === 'confirmed' || o.status === 'in-transit'
     );
-    
+
     console.log(`✅ Eligible orders: ${eligibleOrders.length}`);
-    
+
     const ordersWithCoords = [];
     const ordersWithoutCoords = [];
-    
+
     eligibleOrders.forEach(o => {
       const hasCoords = o.lat && o.lon && !isNaN(o.lat) && !isNaN(o.lon);
-      
+
       if (hasCoords) {
         ordersWithCoords.push(o);
       } else {
         ordersWithoutCoords.push(o);
       }
     });
-    
+
     deliveryLocations = ordersWithCoords.map(o => ({
       id: o._id,
       name: o.farmerId?.name || 'Farmer',
@@ -1316,7 +1316,7 @@ async function loadDeliveriesForRouting() {
     }
 
     displayLocationsOnMap(deliveryLocations, 'delivery');
-    
+
     if (ordersWithoutCoords.length > 0) {
       showToast(`Loaded ${deliveryLocations.length} deliveries. ${ordersWithoutCoords.length} missing coordinates.`, 'warning');
     } else {
@@ -1394,14 +1394,16 @@ function displayLocationsOnMap(locations, type) {
 // Unified optimization function
 async function optimizeCurrentRoute() {
   const locations = currentRouteType === 'pickup' ? pickupLocations : deliveryLocations;
-  
+
   if (locations.length < 1) {
     showToast(`Need at least 1 ${currentRouteType} location`, 'error');
     return;
   }
 
+  // ✅ VISUAL FEEDBACK
+  showToast('Optimizing route, please wait...', 'info');
   const overlay = document.getElementById('routeLoadingOverlay');
-  overlay.classList.add('active');
+  if (overlay) overlay.style.display = 'flex';
 
   try {
     // Add depot as first location
@@ -1422,26 +1424,29 @@ async function optimizeCurrentRoute() {
     }
 
     const result = await res.json();
-    
+
     // Preserve ALL properties when adding depot at end
     const depotEnd = { ...COMPOST_CENTER };
     const routeWithReturn = [...result.optimizedOrder, depotEnd];
-    
+
     // Recalculate metrics with return trip
     const totalDistance = calculateTotalDistance(routeWithReturn);
     const travelTime = (totalDistance / 30) * 60;
     const stopTime = (routeWithReturn.length - 2) * 5; // Exclude depot from stop time
     const totalTime = Math.round(travelTime + stopTime);
-    
+
     // Preserve all properties in optimizedOrder
     result.optimizedOrder = routeWithReturn;
     result.metrics.totalDistance = Math.round(totalDistance * 100) / 100;
     result.metrics.estimatedTime = totalTime;
     result.metrics.totalStops = routeWithReturn.length;
-    
+
     optimizedRouteData = result;
-    
+
+    const aiReasoning = result.reasoning || result.reason || result.explanation || null;
+
     displayOptimizedRoute(result.optimizedOrder, result.metrics, result.method);
+    updateRouteMethodInfo(result.method, aiReasoning);
     showToast(`Route optimized using ${result.method === 'gemini' ? '✨ Gemini AI' : '🔧 Fallback algorithm'}!`);
 
   } catch (error) {
@@ -1466,10 +1471,10 @@ function calculateDistance(loc1, loc2) {
   const R = 6371; // Earth radius in km
   const dLat = (loc2.lat - loc1.lat) * Math.PI / 180;
   const dLon = (loc2.lon - loc1.lon) * Math.PI / 180;
-  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(loc1.lat * Math.PI / 180) * Math.cos(loc2.lat * Math.PI / 180) *
-            Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(loc1.lat * Math.PI / 180) * Math.cos(loc2.lat * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
 
@@ -1483,7 +1488,7 @@ function displayOptimizedRoute(optimizedOrder, metrics, method) {
 
   // Draw route line (including return to depot)
   const coordinates = optimizedOrder.map(loc => [loc.lat, loc.lon]);
-  
+
   routeLine = L.polyline(coordinates, {
     color: lineColor,
     weight: 5,
@@ -1498,24 +1503,24 @@ function displayOptimizedRoute(optimizedOrder, metrics, method) {
     const end = coordinates[i + 1];
     const midLat = (start[0] + end[0]) / 2;
     const midLon = (start[1] + end[1]) / 2;
-    
+
     const angle = Math.atan2(end[1] - start[1], end[0] - start[0]) * 180 / Math.PI;
-    
+
     const arrowIcon = L.divIcon({
       html: `<div style="transform: rotate(${angle + 90}deg); color: ${lineColor}; font-size: 20px;">▼</div>`,
       className: '',
       iconSize: [20, 20]
     });
-    
+
     L.marker([midLat, midLon], { icon: arrowIcon }).addTo(routeMap);
   }
 
   // Add stop markers (skip depot)
   optimizedOrder.forEach((loc, index) => {
     if (loc.isDepot) return; // Skip depot - it has permanent blue marker
-    
+
     const stopNumber = index; // Depot is 0, first stop is 1, etc.
-    
+
     const icon = L.divIcon({
       html: `<div class="custom-marker optimized-marker" style="background:${markerColor};border-color:${markerColor};">${stopNumber}</div>`,
       className: '',
@@ -1575,7 +1580,7 @@ function updateRouteStopList(order) {
     const isDepot = loc.isDepot;
     const bgColor = isDepot ? '#3b82f6' : (currentRouteType === 'pickup' ? '#00A63E' : '#f97316');
     const label = isDepot ? (index === 0 ? 'START' : 'END') : index.toString();
-    
+
     // Build details based on route type
     let details = '';
     if (isDepot) {
@@ -1595,7 +1600,7 @@ function updateRouteStopList(order) {
         </div>
       `;
     }
-    
+
     return `
       <div class="stop-item" onclick="focusOnStop(${index})">
         <div class="stop-number" style="background:${bgColor};">${label}</div>
@@ -1613,10 +1618,10 @@ function updateRouteStopList(order) {
 function focusOnStop(index) {
   const order = optimizedRouteData?.optimizedOrder;
   if (!order || !order[index]) return;
-  
+
   const loc = order[index];
   routeMap.setView([loc.lat, loc.lon], 15, { animate: true });
-  
+
   // Find and open popup for this location
   routeMarkers.forEach(marker => {
     const pos = marker.getLatLng();
@@ -1631,7 +1636,7 @@ function updateRouteMetrics(metrics) {
   setText('routeTotalStops', metrics.totalStops || 0);
   setText('routeTotalDistance', `${metrics.totalDistance || 0} km`);
   setText('routeEstimatedTime', `${metrics.estimatedTime || 0} min`);
-  
+
   if (currentRouteType === 'pickup') {
     setText('routeMetricValue', `${metrics.timeSaved || 0} min`);
   } else {
@@ -1642,20 +1647,32 @@ function updateRouteMetrics(metrics) {
 }
 
 // Update method info
-function updateRouteMethodInfo(method) {
+function updateRouteMethodInfo(method, reasoning) {
   const card = document.getElementById('routeMethodCard');
   const info = document.getElementById('routeMethodInfo');
-  
+
+  let content = '';
+
   if (method === 'gemini') {
-    info.innerHTML = `
+    content = `
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
         <span style="font-size:24px;">✨</span>
         <strong style="color:#00A63E;">Gemini AI Optimization</strong>
       </div>
       <p style="margin:0;">Route optimized using Google's Gemini AI with Haversine distance calculations. Route starts and ends at Compost Center.</p>
     `;
+
+    if (reasoning) {
+      content += `
+        <div style="margin-top:12px;padding:10px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;">
+          <strong style="color:#166534;font-size:13px;display:block;margin-bottom:4px;">AI Reasoning:</strong>
+          <p style="margin:0;font-size:13px;color:#15803d;line-height:1.5;">${reasoning}</p>
+        </div>
+      `;
+    }
+
   } else {
-    info.innerHTML = `
+    content = `
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
         <span style="font-size:24px;">🔧</span>
         <strong style="color:#3b82f6;">Nearest-Neighbor Algorithm</strong>
@@ -1663,7 +1680,8 @@ function updateRouteMethodInfo(method) {
       <p style="margin:0;">Route optimized using greedy nearest-neighbor algorithm. Route starts and ends at Compost Center.</p>
     `;
   }
-  
+
+  info.innerHTML = content;
   card.style.display = 'block';
 }
 
@@ -1676,10 +1694,10 @@ function refreshCurrentMap() {
 function clearCurrentRoute() {
   clearRouteMarkers();
   clearRouteLine();
-  
+
   // Re-add depot marker
   addDepotMarker();
-  
+
   document.getElementById('routeStopList').innerHTML = '<div class="empty-state">Click "Optimize Route" to generate sequence</div>';
   document.getElementById('routeMethodCard').style.display = 'none';
 }
@@ -1691,6 +1709,7 @@ function clearRouteMarkers() {
 
 function clearRouteLine() {
   if (routeLine) {
+
     routeMap.removeLayer(routeLine);
     routeLine = null;
   }
@@ -1723,27 +1742,27 @@ function exportRoutePDF() {
 
   doc.setFontSize(16);
   doc.text(`Optimized ${currentRouteType === 'pickup' ? 'Pickup' : 'Delivery'} Route`, 10, 10);
-  
+
   doc.setFontSize(10);
-  doc.text(`Generated: ${new Date().toLocaleString()}`, 10, 20);
+  doc.text(`Generated: ${new Date().toLocaleString()} `, 10, 20);
   doc.text(`Total Distance: ${optimizedRouteData.metrics.totalDistance} km`, 10, 26);
   doc.text(`Total Time: ${optimizedRouteData.metrics.estimatedTime} min`, 10, 32);
 
   let y = 45;
   doc.setFontSize(12);
-  
+
   optimizedRouteData.optimizedOrder.forEach((loc, index) => {
     const label = loc.isDepot ? (index === 0 ? 'START' : 'END') : index;
-    doc.text(`${label}. ${loc.name} - ${loc.address}`, 10, y);
+    doc.text(`${label}. ${loc.name} - ${loc.address} `, 10, y);
     y += 8;
-    
+
     if (y > 270) {
       doc.addPage();
       y = 20;
     }
   });
 
-  doc.save(`route-${currentRouteType}-${new Date().toISOString().split('T')[0]}.pdf`);
+  doc.save(`route - ${currentRouteType} -${new Date().toISOString().split('T')[0]}.pdf`);
   showToast('Route exported as PDF');
 }
 
@@ -1770,18 +1789,18 @@ function exportRouteCSV() {
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `route-${currentRouteType}-${new Date().toISOString().split('T')[0]}.csv`;
+  a.download = `route - ${currentRouteType} -${new Date().toISOString().split('T')[0]}.csv`;
   a.click();
   window.URL.revokeObjectURL(url);
-  
+
   showToast('Route exported as CSV');
 }
 
 // Initialize when section is shown
 const originalShowSection = window.showSection;
-window.showSection = function(sectionName) {
+window.showSection = function (sectionName) {
   originalShowSection(sectionName);
-  
+
   if (sectionName === 'route-planning') {
     setTimeout(() => {
       initRouteMap();
