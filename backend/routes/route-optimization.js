@@ -80,13 +80,14 @@ router.post('/optimize-route', auth, async (req, res) => {
       }
 
       const model = genAI.getGenerativeModel({
-        model: 'gemini-1.5-flash-001',
+        model: 'models/gemini-2.5-flash',
         generationConfig: {
           temperature: 0.1,
           maxOutputTokens: 1024,
-          responseMimeType: "application/json" // Force JSON response
+          responseMimeType: "application/json"
         }
       });
+
 
       // Prepare location data for Gemini
       const locationData = locations.map((loc, idx) => ({
