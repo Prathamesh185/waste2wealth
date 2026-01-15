@@ -1570,7 +1570,15 @@ async function optimizeCurrentRoute() {
 
     displayOptimizedRoute(result.optimizedOrder, result.metrics, result.method);
     updateRouteMethodInfo(result.method, aiReasoning);
-    showToast(`Route optimized using ${result.method === 'gemini' ? '✨ Gemini AI' : '🔧 Fallback algorithm'}!`);
+
+    if (result.method === 'gemini') {
+      console.log('✅ Optimization method used: gemini');
+      showToast('Route optimized using ✨ Gemini AI!');
+    } else {
+      console.warn('⚠️ Optimization method used: fallback');
+      console.warn('Check backend console for Gemini API errors.');
+      showToast('Route optimized using 🔧 Fallback algorithm (Gemini failed)');
+    }
 
   } catch (error) {
     console.error('❌ Optimization error:', error);

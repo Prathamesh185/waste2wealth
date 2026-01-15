@@ -117,6 +117,23 @@ window.showLocationPicker = showLocationPicker;
 window.closeLocationPicker = closeLocationPicker;
 window.confirmLocation = confirmLocation;
 
+// ✅ NEW: Enable waste category dropdown manually
+window.enableWasteCategory = function (e) {
+	if (e) e.preventDefault();
+	const select = document.getElementById('wasteType');
+	const link = document.getElementById('changeCategoryLink');
+	if (select) {
+		select.disabled = false;
+		select.style.backgroundColor = '';
+		select.style.cursor = '';
+		// Focus to encourage selection
+		select.focus();
+	}
+	if (link) {
+		link.style.display = 'none';
+	}
+};
+
 
 // Toasts
 function showToast(message, type = 'success') {
@@ -204,8 +221,13 @@ function showSection(section) {
 
 	// ✅ PRELOAD AI MODEL
 	if (section === 'request-pickup' && window.loadModel) {
-		console.log('Preloading AI model...');
-		window.loadModel();
+		const isLoaded = window.isModelLoaded && window.isModelLoaded();
+		const isLoading = window.isModelLoading && window.isModelLoading();
+
+		if (!isLoaded && !isLoading) {
+			console.log('Preloading AI model...');
+			window.loadModel();
+		}
 	}
 }
 
@@ -267,12 +289,24 @@ async function handlePickupRequest(e) {
 			isWasteOrganic = false;
 		}
 
-		// ✅ RESET SUBMIT BUTTON (Stay enabled for optional classification)
+		// ✅ RESET SUBMIT BUTTON
 		const submitBtn = document.querySelector('#pickupForm button[type="submit"]');
 		if (submitBtn) {
 			submitBtn.disabled = false;
 			submitBtn.textContent = 'Schedule Pickup';
-			submitBtn.style.background = 'var(--primary-green)';
+			submitBtn.style.background = ''; // Reset to default CSS
+		}
+
+		// ✅ RESET WASTE TYPE STATE
+		const wasteSelect = document.getElementById('wasteType');
+		const changeLink = document.getElementById('changeCategoryLink');
+		if (wasteSelect) {
+			wasteSelect.disabled = false;
+			wasteSelect.style.backgroundColor = '';
+			wasteSelect.style.cursor = '';
+		}
+		if (changeLink) {
+			changeLink.style.display = 'none';
 		}
 
 		// ✅ CLEAR AI RESULT

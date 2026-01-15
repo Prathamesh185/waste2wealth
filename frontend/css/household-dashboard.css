@@ -37,7 +37,7 @@
 
 body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background-color: #f3f4f6;
+    background-color: #f3f4f6a8;
     /* Slightly darker background for card contrast */
     color: var(--dark-gray);
     line-height: 1.6;
@@ -83,7 +83,7 @@ body {
 .nav-links {
     display: flex;
     gap: 8px;
-    background: var(--light-gray);
+    background: var(--white);
     padding: 4px;
     border-radius: 12px;
 }
@@ -1501,7 +1501,6 @@ body {
     .nav-links {
         order: 3;
         width: 100%;
-        margin-top: 16px;
         flex-wrap: wrap;
         gap: 6px;
     }

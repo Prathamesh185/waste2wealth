@@ -45,6 +45,7 @@ function fallbackOptimization(locations) {
 }
 
 router.post('/optimize-route', auth, async (req, res) => {
+  console.log('--- Route Optimization Request v3 (Gemini 1.5) ---');
   try {
     // Only admin can optimize routes
     if (req.user.role !== 'admin') {
@@ -79,10 +80,11 @@ router.post('/optimize-route', auth, async (req, res) => {
       }
 
       const model = genAI.getGenerativeModel({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-1.5-flash',
         generationConfig: {
-          temperature: 0.1, // Lower temperature for consistent routing
-          maxOutputTokens: 1024
+          temperature: 0.1,
+          maxOutputTokens: 1024,
+          responseMimeType: "application/json" // Force JSON response
         }
       });
 
@@ -98,36 +100,44 @@ router.post('/optimize-route', auth, async (req, res) => {
 
       // Craft optimization prompt for Gemini
       const prompt = `
-You are a route optimization expert. 
-Return STRICT JSON ONLY. Do NOT include any text outside JSON.
+You are a route optimization expert.
+Task: Optimize the route visiting sequence required to minimize total distance.
+Start at index 0. Visit all other locations exactly once.
+Return Strict JSON.
 
 LOCATIONS:
 ${locationData.map((loc, i) => `${i}. ${loc.name} (${loc.lat}, ${loc.lon})`).join('\n')}
 
-TASK:
-1. Compute shortest route starting from index 0.
-2. Visit all locations exactly once.
-3. Output strictly valid JSON.
-
-OUTPUT:
+OUTPUT FORMAT:
 {
   "optimizedOrder": [0, 2, 1],
-  "reasoning": "Explain steps in simple sentences separated by \\n. No bullets, no emojis, no unicode. Escape all quotes."
+  "reasoning": "Brief explanation of the route choice."
 }
 `;
 
-
+      console.log('Sending prompt to Gemini...');
       const result = await model.generateContent(prompt);
       const response = await result.response;
-      const text = response.text();
+      let text = response.text();
+
+      console.log('📝 Raw Gemini Response:', text);
+
+      // Clean cleanup potential markdown
+      text = text.replace(/```json/g, '').replace(/```/g, '').trim();
 
       // Parse Gemini response
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
-        throw new Error('Could not parse Gemini response');
+        // Try parsing the whole text if regex failed (since we asked for JSON mode)
+        try {
+          JSON.parse(text);
+          // If success, use text directly
+        } catch (e) {
+          throw new Error('Could not find JSON in response: ' + text.substring(0, 100) + '...');
+        }
       }
 
-      const geminiResult = JSON.parse(jsonMatch[0]);
+      const geminiResult = JSON.parse(jsonMatch ? jsonMatch[0] : text);
 
       // Validate response structure
       if (!geminiResult.optimizedOrder || !Array.isArray(geminiResult.optimizedOrder)) {
@@ -154,7 +164,12 @@ OUTPUT:
 
     } catch (geminiError) {
       // Fallback to simple nearest-neighbor algorithm
-      console.warn('⚠️ Gemini optimization failed, using fallback:', geminiError.message);
+      console.error('⚠️ Gemini optimization failed:', geminiError);
+      console.warn('Reason for failure:', geminiError.message);
+      if (geminiError.response) {
+        console.warn('Gemini Response Error:', await geminiError.response.text());
+      }
+
       method = 'fallback';
       optimizedOrder = fallbackOptimization(locations);
     }

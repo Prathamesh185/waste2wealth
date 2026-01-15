@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Household Dashboard - EcoCompost</title>
     <link rel="stylesheet" href="css/household-dashboard.css">
+    <link rel="icon" type="image/png" href="favicon.png">
 
     <!-- ✅ FIXED: Leaflet without integrity checks -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
@@ -216,33 +217,14 @@
                     <div class="pickup-card">
                         <h3>Pickup Details</h3>
                         <form id="pickupForm">
-                            <div class="form-group">
-                                <label for="wasteType">Waste Type *</label>
-                                <select id="wasteType" required>
-                                    <option value="">Select waste type</option>
-                                    <option value="vegetable-peels">Vegetable Peels & Food Scraps</option>
-                                    <option value="fruit-waste">Fruit Waste & Leftovers</option>
-                                    <option value="mixed-organic">Mixed Organic Waste</option>
-                                    <option value="coffee-grounds">Coffee Grounds</option>
-                                    <option value="tea-leaves">Tea Leaves</option>
-                                </select>
-                            </div>
-
+                            <!-- 1. Quantity -->
                             <div class="form-group">
                                 <label for="quantity">Estimated Weight (kg) *</label>
                                 <input type="number" id="quantity" placeholder="e.g., 2.5" min="0.5" step="0.1"
                                     required>
                             </div>
 
-                            <div class="form-group ai-section">
-                                <label>🤖✨ AI Waste Classifier </label>
-                                <input type="file" id="wasteImage" accept="image/*" >
-                                <button type="button" class="btn-primary" onclick="onClassifyClick()">
-                                    Classify Image
-                                </button>
-                                <div id="aiResult" style="margin-top:10px; font-weight:600;"></div>
-                            </div>
-
+                            <!-- 2. Preferred Date & Time -->
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="pickupDate">Preferred Date *</label>
@@ -261,6 +243,37 @@
                                         <option value="18:00-20:00">18:00 - 20:00</option>
                                     </select>
                                 </div>
+                            </div>
+
+                            <!-- 3. AI Waste Classifier -->
+                            <div class="form-group ai-section">
+                                <label>🤖✨ AI Waste Classifier </label>
+                                <input type="file" id="wasteImage" accept="image/*" capture="environment" />
+
+                                <button type="button" class="btn-primary" onclick="onClassifyClick()">
+                                    Classify Image
+                                </button>
+                                <div id="aiResult" style="margin-top:10px; font-weight:600;"></div>
+                            </div>
+
+                            <!-- 4. Waste Category (Auto-filled) -->
+                            <div class="form-group">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <label for="wasteType">Waste Type *</label>
+                                    <a href="#" id="changeCategoryLink" onclick="enableWasteCategory(event)"
+                                        style="display:none; font-size:8px; color:var(--primary-green); text-decoration:underline;">Change</a>
+                                </div>
+                                <select id="wasteType" required>
+                                    <option value="">Select waste type</option>
+                                    <option value="vegetable-peels">Vegetable Peels & Food Scraps</option>
+                                    <option value="fruit-waste">Fruit Waste & Leftovers</option>
+                                    <option value="mixed-organic">Mixed Organic Waste</option>
+                                    <option value="coffee-grounds">Coffee Grounds</option>
+                                    <option value="tea-leaves">Tea Leaves</option>
+                                    <!-- ✅ NEW: Added support for other waste types -->
+                                    <option value="recyclable">Recyclable Waste (Paper, Cardboard)</option>
+                                    <option value="non-organic">Non-Organic / Non-Recyclable</option>
+                                </select>
                             </div>
 
                             <!-- In household-dashboard.html, inside the pickup form -->
@@ -295,8 +308,8 @@
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn-primary" disabled style="background:#94a3b8;">
-                                📸 Classify waste first
+                            <button type="submit" class="btn-primary" style="background:var(--primary-green);">
+                                Schedule Pickup
                             </button>
                         </form>
                     </div>
@@ -344,7 +357,7 @@
                     <div class="rewards-header">
                         <div>
                             <h1>Rewards Center</h1>
-                            <p>Redeem your points for exciting rewards and support local businesses</p>
+                            <p>Redeem your points for exciting rewards</p>
                         </div>
                     </div>
 
