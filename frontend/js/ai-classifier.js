@@ -1,6 +1,6 @@
 let mobilenetModel = null;
 let modelLoaded = false;
-let modelLoadingPromise = null; // Check for concurrent loads
+let modelLoadingPromise = null;
 let isWasteOrganic = false;
 
 async function loadModel() {
@@ -9,16 +9,47 @@ async function loadModel() {
 
   modelLoadingPromise = (async () => {
     try {
-      // console.log('⏳ Loading MobileNet...');
-      mobilenetModel = await mobilenet.load();
+      console.log('⏳ Loading MobileNet...');
+
+      // ✅ FORCE SPECIFIC MODEL VERSION AND BACKEND
+      await tf.setBackend('webgl'); // Force WebGL backend
+      await tf.ready();
+
+      console.log('🔧 TensorFlow backend:', tf.getBackend());
+      console.log('📱 Device info:', navigator.userAgent);
+
+      // Load MobileNet v2 (more consistent across devices)
+      mobilenetModel = await mobilenet.load({
+        version: 2,
+        alpha: 1.0 // Full precision
+      });
+
       modelLoaded = true;
-      console.log('✅ MobileNet loaded');
+      console.log('✅ MobileNet loaded successfully');
       showToast('AI model ready', 'success');
     } catch (err) {
-      console.error('Error loading MobileNet', err);
-      showToast('AI model failed to load', 'error');
-      modelLoadingPromise = null; // Enable retry
-      throw err;
+      console.error('❌ Error loading MobileNet:', err);
+
+      // Fallback to CPU backend
+      try {
+        console.log('⚠️ Trying CPU backend...');
+        await tf.setBackend('cpu');
+        await tf.ready();
+
+        mobilenetModel = await mobilenet.load({
+          version: 2,
+          alpha: 1.0
+        });
+
+        modelLoaded = true;
+        console.log('✅ MobileNet loaded (CPU mode)');
+        showToast('AI model ready (CPU mode)', 'success');
+      } catch (fallbackErr) {
+        console.error('❌ Failed to load model:', fallbackErr);
+        showToast('AI model failed to load', 'error');
+        modelLoadingPromise = null;
+        throw fallbackErr;
+      }
     }
   })();
 
@@ -33,153 +64,91 @@ async function onClassifyClick() {
   await classifyFile(input.files[0]);
 }
 
-// ✅ NEW: Fix image orientation using EXIF data
-function getOrientation(file) {
-  return new Promise((resolve) => {
+// ✅ NORMALIZE IMAGE TO EXACT SAME FORMAT
+async function normalizeImage(file) {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
+
     reader.onload = (e) => {
-      try {
-        const view = new DataView(e.target.result);
-        if (view.byteLength < 2 || view.getUint16(0, false) !== 0xFFD8) {
-          return resolve(-2); // Not a JPEG
+      const img = new Image();
+
+      img.onload = () => {
+        console.log('📐 Original image:', {
+          width: img.width,
+          height: img.height,
+          naturalWidth: img.naturalWidth,
+          naturalHeight: img.naturalHeight
+        });
+
+        // ✅ CREATE STANDARDIZED 224x224 IMAGE
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d', {
+          alpha: false,
+          willReadFrequently: false
+        });
+
+        // MobileNet expects 224x224
+        canvas.width = 224;
+        canvas.height = 224;
+
+        // Calculate scaling to maintain aspect ratio
+        const scale = Math.max(224 / img.width, 224 / img.height);
+        const scaledWidth = img.width * scale;
+        const scaledHeight = img.height * scale;
+
+        // Center crop
+        const x = (224 - scaledWidth) / 2;
+        const y = (224 - scaledHeight) / 2;
+
+        // Fill with white background
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, 224, 224);
+
+        // Draw image
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+
+        // ✅ NORMALIZE PIXEL VALUES (critical for consistency)
+        const imageData = ctx.getImageData(0, 0, 224, 224);
+        const data = imageData.data;
+
+        // Apply standard normalization (-1 to 1 range)
+        for (let i = 0; i < data.length; i += 4) {
+          // Normalize RGB values to [-1, 1] range
+          data[i] = (data[i] / 127.5) - 1;     // R
+          data[i + 1] = (data[i + 1] / 127.5) - 1; // G
+          data[i + 2] = (data[i + 2] / 127.5) - 1; // B
+          // Keep alpha as is
         }
-        const length = view.byteLength;
-        let offset = 2;
-        while (offset < length) {
-          if (offset + 4 > length) return resolve(-1); // Prevent out of bounds
-          if (view.getUint16(offset + 2, false) <= 8) return resolve(-1);
-          const marker = view.getUint16(offset, false);
-          offset += 2;
-          if (marker === 0xFFE1) {
-            if (offset + 10 > length) return resolve(-1);
-            if (view.getUint32(offset += 2, false) !== 0x45786966) {
-              return resolve(-1);
-            }
-            const little = view.getUint16(offset += 6, false) === 0x4949;
-            offset += view.getUint32(offset + 4, little);
-            if (offset + 2 > length) return resolve(-1);
-            const tags = view.getUint16(offset, little);
-            offset += 2;
-            for (let i = 0; i < tags; i++) {
-              if (offset + (i * 12) + 12 > length) return resolve(-1);
-              if (view.getUint16(offset + (i * 12), little) === 0x0112) {
-                return resolve(view.getUint16(offset + (i * 12) + 8, little));
-              }
-            }
-          } else if ((marker & 0xFF00) !== 0xFF00) {
-            break;
-          } else {
-            offset += view.getUint16(offset, false);
-          }
+
+        // Convert back to [0, 255] for display
+        const displayData = new Uint8ClampedArray(data.length);
+        for (let i = 0; i < data.length; i += 4) {
+          displayData[i] = (data[i] + 1) * 127.5;
+          displayData[i + 1] = (data[i + 1] + 1) * 127.5;
+          displayData[i + 2] = (data[i + 2] + 1) * 127.5;
+          displayData[i + 3] = data[i + 3];
         }
-        return resolve(-1);
-      } catch (err) {
-        console.warn('Error reading EXIF:', err);
-        return resolve(-1);
-      }
-    };
-    reader.onerror = () => {
-      console.warn('FileReader error');
-      resolve(-1);
-    };
-    reader.readAsArrayBuffer(file);
-  });
-}
 
-// ✅ NEW: Apply orientation correction
-function resetOrientation(srcBase64, srcOrientation, callback) {
-  const img = new Image();
-  img.onload = () => {
-    const width = img.width;
-    const height = img.height;
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+        const displayImageData = new ImageData(displayData, 224, 224);
+        const displayCanvas = document.createElement('canvas');
+        displayCanvas.width = 224;
+        displayCanvas.height = 224;
+        displayCanvas.getContext('2d').putImageData(displayImageData, 0, 0);
 
-    // Set proper canvas dimensions
-    if ([5, 6, 7, 8].indexOf(srcOrientation) > -1) {
-      canvas.width = height;
-      canvas.height = width;
-    } else {
-      canvas.width = width;
-      canvas.height = height;
-    }
-
-    // Transform context before drawing image
-    switch (srcOrientation) {
-      case 2: ctx.transform(-1, 0, 0, 1, width, 0); break;
-      case 3: ctx.transform(-1, 0, 0, -1, width, height); break;
-      case 4: ctx.transform(1, 0, 0, -1, 0, height); break;
-      case 5: ctx.transform(0, 1, 1, 0, 0, 0); break;
-      case 6: ctx.transform(0, 1, -1, 0, height, 0); break;
-      case 7: ctx.transform(0, -1, -1, 0, height, width); break;
-      case 8: ctx.transform(0, -1, 1, 0, 0, width); break;
-      default: break;
-    }
-
-    // Draw image
-    ctx.drawImage(img, 0, 0);
-    callback(canvas.toDataURL());
-  };
-  img.src = srcBase64;
-}
-
-// ✅ IMPROVED: Process image with orientation fix and resize
-async function processImage(file) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      // Get EXIF orientation
-      const orientation = await getOrientation(file);
-      console.log('📐 Image orientation:', orientation);
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const originalImage = e.target.result;
-
-        // Fix orientation if needed
-        if (orientation > 1) {
-          resetOrientation(originalImage, orientation, (correctedImage) => {
-            resolve({ src: correctedImage, orientation: orientation });
-          });
-        } else {
-          resolve({ src: originalImage, orientation: orientation });
-        }
+        resolve({
+          canvas: canvas,
+          displayUrl: displayCanvas.toDataURL('image/jpeg', 1.0)
+        });
       };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    } catch (error) {
-      reject(error);
-    }
-  });
-}
 
-// ✅ IMPROVED: Resize image for consistent processing
-function resizeImage(imgSrc, maxWidth = 400) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-
-      // Calculate new dimensions maintaining aspect ratio
-      let width = img.width;
-      let height = img.height;
-
-      if (width > maxWidth) {
-        height = (height * maxWidth) / width;
-        width = maxWidth;
-      }
-
-      canvas.width = width;
-      canvas.height = height;
-
-      // Use high-quality image smoothing
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-      ctx.drawImage(img, 0, 0, width, height);
-
-      resolve(canvas.toDataURL('image/jpeg', 0.9));
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = e.target.result;
     };
-    img.src = imgSrc;
+
+    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.readAsDataURL(file);
   });
 }
 
@@ -189,7 +158,7 @@ async function classifyFile(file) {
 
   const submitBtn = document.querySelector('#pickupForm button[type="submit"]');
   if (submitBtn) {
-    submitBtn.disabled = true; // Temporary disable while processing
+    submitBtn.disabled = true;
     submitBtn.textContent = 'Analyzing waste...';
   }
 
@@ -199,199 +168,225 @@ async function classifyFile(file) {
   }
 
   try {
-    // ✅ STEP 1: Process image (fix orientation)
-    console.log('📸 Processing image...');
-    const processed = await processImage(file);
-    const processedImageSrc = processed.src;
-    const orientation = processed.orientation;
+    console.log('📸 Normalizing image...');
+    const normalized = await normalizeImage(file);
 
-    // ✅ STEP 2: Resize for consistent analysis
-    console.log('📏 Resizing image...');
-    const resizedImageSrc = await resizeImage(processedImageSrc, 400);
+    console.log('🤖 Classifying with MobileNet...');
+    console.log('🔧 TensorFlow backend:', tf.getBackend());
 
-    // ✅ STEP 3: Create image element for classification
-    const img = document.createElement('img');
-    img.src = resizedImageSrc;
-    img.onload = () => runClassification(img, orientation);
+    // ✅ CLASSIFY USING CANVAS DIRECTLY
+    const predictions = await mobilenetModel.classify(normalized.canvas, 15);
+
+    console.log('🔍 Raw predictions:', predictions);
+
+    // Log device info for debugging
+    console.log('📱 Classification context:', {
+      userAgent: navigator.userAgent.substring(0, 100),
+      backend: tf.getBackend(),
+      platform: navigator.platform,
+      screenSize: `${window.screen.width}x${window.screen.height}`
+    });
+
+    await analyzeAndDisplay(predictions, normalized.displayUrl, file.name);
 
   } catch (err) {
-    console.error('❌ AI classify error:', err);
-    resultBox.innerHTML = `<p>❌ Error analyzing image: ${err.message || 'Unknown error'}</p>`;
+    console.error('❌ Classification error:', err);
+    resultBox.innerHTML = `<p>❌ Error: ${err.message}</p>`;
     enableSubmitBtn();
   }
 }
 
-// ✅ NEW: Decoupled classification logic for re-use
-async function runClassification(imgElement, orientationStr) {
+async function analyzeAndDisplay(predictions, imageUrl, fileName) {
   const resultBox = document.getElementById('aiResult');
-  const submitBtn = document.querySelector('#pickupForm button[type="submit"]');
 
-  resultBox.innerHTML = '🤖 Analyzing with AI...';
+  // Enhanced keywords
+  const compostKeywords = [
+    'banana', 'apple', 'orange', 'lemon', 'mango', 'pear', 'pineapple',
+    'strawberry', 'grapes', 'watermelon', 'peach', 'plum', 'kiwi',
+    'vegetable', 'potato', 'tomato', 'cabbage', 'onion', 'carrot',
+    'broccoli', 'cauliflower', 'cucumber', 'lettuce', 'spinach', 'pepper',
+    'squash', 'zucchini', 'eggplant', 'pumpkin', 'corn', 'mushroom',
+    'food', 'salad', 'pizza', 'sandwich', 'bread', 'rice', 'pasta',
+    'soup', 'meal', 'dish', 'plate', 'bowl', 'bagel', 'pretzel',
+    'leaf', 'leaves', 'plant', 'flower', 'grass', 'twig', 'bark',
+    'peel', 'shell', 'seed', 'nut', 'egg', 'coffee', 'tea', 'bean'
+  ];
 
-  try {
-    const predictions = await mobilenetModel.classify(imgElement, 10);
-    console.log('🔍 MobileNet predictions:', predictions);
+  const nonCompostKeywords = [
+    'plastic', 'bottle', 'wrapper', 'bag', 'container', 'package',
+    'styrofoam', 'foam', 'packaging',
+    'can', 'metal', 'glass', 'jar', 'aluminum', 'steel', 'tin',
+    'phone', 'remote', 'toy', 'tool', 'utensil', 'cup', 'mug',
+    'fork', 'spoon', 'knife', 'screwdriver', 'hammer',
+    'tire', 'wheel', 'battery', 'cable', 'wire',
+    'pin', 'safety pin', 'clip', 'buckle', 'diaper'
+  ];
 
-    // ... (Keywords definitions: compostKeywords, etc. - kept same for brevity) ...
-    const compostKeywords = [
-      'banana', 'apple', 'orange', 'lemon', 'mango', 'pear', 'pineapple',
-      'strawberry', 'grapes', 'watermelon', 'peach', 'plum', 'kiwi',
-      'vegetable', 'potato', 'tomato', 'cabbage', 'onion', 'carrot',
-      'broccoli', 'cauliflower', 'cucumber', 'lettuce', 'spinach', 'pepper',
-      'squash', 'zucchini', 'eggplant', 'pumpkin', 'corn', 'mushroom',
-      'food', 'salad', 'pizza', 'sandwich', 'bread', 'rice', 'pasta',
-      'soup', 'meal', 'dish', 'plate', 'bowl',
-      'leaf', 'leaves', 'plant', 'flower', 'grass', 'twig', 'bark',
-      'peel', 'shell', 'seed', 'nut', 'egg', 'coffee', 'tea'
+  const recycleKeywords = [
+    'paper', 'cardboard', 'newspaper', 'book', 'magazine',
+    'box', 'carton', 'envelope', 'notebook'
+  ];
+
+  // ✅ FILTER FALSE POSITIVES FIRST
+  const filteredPredictions = predictions.filter(pred => {
+    const label = pred.className.toLowerCase();
+
+    // Exclude obvious false positives
+    const falsePositives = ['safety pin', 'diaper', 'buckle', 'ballpoint'];
+    if (falsePositives.some(fp => label.includes(fp))) {
+      console.log(`🚫 Filtered out false positive: ${pred.className} (${(pred.probability * 100).toFixed(1)}%)`);
+      return false;
+    }
+    return true;
+  });
+
+  const topk = filteredPredictions.slice(0, 10);
+
+  console.log('✅ Filtered predictions:', topk.map(p => `${p.className} (${(p.probability * 100).toFixed(1)}%)`));
+
+  let score = { compost: 0, non: 0, recycle: 0 };
+
+  topk.forEach((pred, index) => {
+    const label = (pred.className || '').toLowerCase();
+    const p = pred.probability || 0;
+    const weight = 1 / (index + 1);
+    const weightedScore = p * weight;
+    const clean = label.replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim();
+
+    const hasCompost = compostKeywords.some(k => clean.includes(k));
+    const hasNon = nonCompostKeywords.some(k => clean.includes(k));
+    const hasRecycle = recycleKeywords.some(k => clean.includes(k));
+
+    if (hasCompost) {
+      score.compost += weightedScore * 3; // Higher boost
+      console.log(`  ✅ Compost match: ${pred.className} (+${(weightedScore * 3).toFixed(3)})`);
+    }
+    if (hasNon) {
+      score.non += weightedScore * 2;
+      console.log(`  ❌ Non-compost match: ${pred.className} (+${(weightedScore * 2).toFixed(3)})`);
+    }
+    if (hasRecycle) {
+      score.recycle += weightedScore * 1.5;
+    }
+
+    // Pattern matching
+    const organicPatterns = [
+      /fruit|vegetable|veg|food|produce|plant|leaf|peel|bean/,
+      /banana|apple|orange|potato|tomato|carrot|bagel|bread/,
+      /salad|meal|dish|leftover|scrap|compost/
     ];
 
-    const nonCompostKeywords = [
-      'plastic', 'bottle', 'wrapper', 'bag', 'container', 'package',
-      'styrofoam', 'foam', 'packaging',
-      'can', 'metal', 'glass', 'jar', 'aluminum', 'steel', 'tin',
-      'phone', 'remote', 'toy', 'tool', 'utensil', 'cup', 'mug',
-      'plate', 'fork', 'spoon', 'knife', 'screwdriver', 'hammer',
-      'tire', 'wheel', 'battery', 'cable', 'wire', 'pin', 'needle'
+    const nonOrganicPatterns = [
+      /bottle|can|plastic|metal|package|wrapper/,
+      /phone|remote|tool|device|electronic/,
+      /pin|safety|buckle|clip|diaper/
     ];
 
-    const recycleKeywords = [
-      'paper', 'cardboard', 'newspaper', 'book', 'magazine',
-      'box', 'carton', 'envelope', 'notebook'
-    ];
-
-    // Scoring logic (kept same)
-    let score = { compost: 0, non: 0, recycle: 0 };
-    const topk = predictions.slice(0, 10);
-
-    topk.forEach((pred, index) => {
-      const label = (pred.className || '').toLowerCase();
-      const p = pred.probability || 0;
-      const weight = 1 / (index + 1);
-      const weightedScore = p * weight;
-      const clean = label.replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim();
-
-      const hasCompost = compostKeywords.some(k => clean.includes(k));
-      const hasNon = nonCompostKeywords.some(k => clean.includes(k));
-      const hasRecycle = recycleKeywords.some(k => clean.includes(k));
-
-      if (hasCompost) score.compost += weightedScore * 2;
-      if (hasNon) score.non += weightedScore * 2;
-      if (hasRecycle) score.recycle += weightedScore * 1.5;
-
-      const organicPatterns = [
-        /fruit|vegetable|veg|food|produce|plant|leaf|root|peel|skin|core|bean|nut|seed/,
-        /banana|apple|orange|potato|tomato|onion|carrot|cabbage|broccoli|cucumber/,
-        /salad|meal|dish|leftover|scrap|compost|bread|bakery|cake|pie/,
-        /flower|grass|weed|garden|clipping|twig/
-      ];
-
-      const nonOrganicPatterns = [
-        /bottle|can|plastic|glass|metal|package|wrapper/,
-        /phone|remote|toy|tool|device|electronic/,
-        /container|cup|jar|utensil|fork|spoon|knife/,
-        /pin|safety|needle/
-      ];
-
-      organicPatterns.forEach(pattern => {
-        if (pattern.test(clean)) score.compost += weightedScore * 1.5;
-      });
-
-      nonOrganicPatterns.forEach(pattern => {
-        if (pattern.test(clean)) score.non += weightedScore * 1.5;
-      });
+    organicPatterns.forEach(pattern => {
+      if (pattern.test(clean)) {
+        score.compost += weightedScore * 2;
+        console.log(`  🌱 Organic pattern: ${pred.className} (+${(weightedScore * 2).toFixed(3)})`);
+      }
     });
 
-    const topCategory = Object.keys(score).reduce((a, b) => score[a] > score[b] ? a : b);
-    const topScore = score[topCategory];
-    const totalScore = score.compost + score.non + score.recycle;
-    const confidence = totalScore > 0 ? (topScore / totalScore) : 0;
-    const CONFIDENCE_THRESHOLD = 0.55;
+    nonOrganicPatterns.forEach(pattern => {
+      if (pattern.test(clean)) {
+        score.non += weightedScore * 2;
+      }
+    });
+  });
 
-    let verdict = 'Unknown';
-    let message = '🤔 Not sure – try a clearer image or different angle.';
-    let verdictClass = 'unknown';
+  console.log('📊 Final scores:', score);
 
-    if (confidence >= CONFIDENCE_THRESHOLD) {
-      if (topCategory === 'compost') {
+  const topCategory = Object.keys(score).reduce((a, b) => score[a] > score[b] ? a : b);
+  const topScore = score[topCategory];
+  const totalScore = score.compost + score.non + score.recycle;
+  const confidence = totalScore > 0 ? (topScore / totalScore) : 0;
+
+  console.log(`🎯 Winner: ${topCategory} (confidence: ${(confidence * 100).toFixed(1)}%)`);
+
+  const CONFIDENCE_THRESHOLD = 0.45;
+
+  let verdict = 'Unknown';
+  let message = '🤔 Not sure – try a clearer photo';
+  let verdictClass = 'unknown';
+
+  if (confidence >= CONFIDENCE_THRESHOLD) {
+    if (topCategory === 'compost') {
+      verdict = 'Compostable';
+      message = '✅ Compostable – add to your green bin!';
+      verdictClass = 'compostable';
+      isWasteOrganic = true;
+    } else if (topCategory === 'non') {
+      verdict = 'Non-compostable';
+      message = '🚫 Non-compostable – dispose responsibly';
+      verdictClass = 'non-compostable';
+      isWasteOrganic = false;
+    } else if (topCategory === 'recycle') {
+      verdict = 'Recyclable';
+      message = '♻️ Recyclable – send to recycling';
+      verdictClass = 'recyclable';
+      isWasteOrganic = false;
+    }
+  } else {
+    // Check top prediction
+    const topPred = topk[0];
+    if (topPred && topPred.probability > 0.30) {
+      const topLabel = topPred.className.toLowerCase();
+      if (/banana|apple|orange|broccoli|strawberry|lemon|mushroom|bagel|pretzel|bean/.test(topLabel)) {
         verdict = 'Compostable';
         message = '✅ Compostable – add to your green bin!';
         verdictClass = 'compostable';
         isWasteOrganic = true;
-      } else if (topCategory === 'non') {
-        verdict = 'Non-compostable';
-        message = '🚫 Non-compostable – dispose responsibly.';
-        verdictClass = 'non-compostable';
-        isWasteOrganic = false;
-      } else if (topCategory === 'recycle') {
-        verdict = 'Recyclable';
-        message = '♻️ Recyclable – please send to recycling.';
-        verdictClass = 'recyclable';
-        isWasteOrganic = false;
-      }
-    } else {
-      // Low confidence fallback (check top prediction)
-      const topPred = topk[0];
-      if (topPred.probability > 0.4) {
-        const topLabel = topPred.className.toLowerCase();
-        if (/banana|apple|orange|broccoli|strawberry|lemon|mushroom/.test(topLabel)) {
-          verdict = 'Compostable';
-          message = '✅ Compostable – add to your green bin!';
-          verdictClass = 'compostable';
-          isWasteOrganic = true;
-        }
+        console.log(`✅ Low confidence override: ${topPred.className} detected as compostable`);
       }
     }
-
-    // UI Updates
-    const debugInfo = `
-      <div style="font-size:11px; color:#6b7280; margin-top:12px; padding:8px; background:#f9fafb; border-radius:6px; text-align:left; border:1px solid #e5e7eb;">
-        <div style="margin-bottom:4px; font-weight:600;">Debug Info (Mobile):</div>
-        <div>Model Verdict: ${verdict}</div>
-        <div>Orientation: ${orientationStr} (Dims: ${imgElement.width}x${imgElement.height})</div>
-        <div style="margin-top:4px; font-weight:600;">Top Predictions:</div>
-        ${topk.slice(0, 3).map(p => `
-          <div style="display:flex; justify-content:space-between;">
-            <span>${p.className}</span>
-            <span>${(p.probability * 100).toFixed(1)}%</span>
-          </div>
-        `).join('')}
-      </div>
-    `;
-
-    resultBox.innerHTML = `
-      <div class="ai-result-card ${verdictClass}">
-        <p><strong>Verdict:</strong> ${verdict}</p>
-        <p>${message}</p>
-        <p class="muted">Confidence: ${(confidence * 100).toFixed(0)}%</p>
-        <div style="position:relative; display:inline-block;">
-             <img id="analyzedImage" src="${imgElement.src}" width="220" style="margin-top:8px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1);"/>
-             <button onclick="rotateAndRetry()" style="position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.6); color:white; border:none; border-radius:4px; padding:4px 8px; cursor:pointer; font-size:12px;">↻ Rotate</button>
-        </div>
-        ${debugInfo}
-      </div>
-    `;
-
-    // Auto-fill logic
-    const wasteTypeSelect = document.getElementById('wasteType');
-    const changeLink = document.getElementById('changeCategoryLink');
-    if (wasteTypeSelect) {
-      if (verdict === 'Compostable') { wasteTypeSelect.value = 'mixed-organic'; }
-      else if (verdict === 'Recyclable') { wasteTypeSelect.value = 'recyclable'; }
-      else if (verdict === 'Non-compostable') { wasteTypeSelect.value = 'non-organic'; }
-
-      wasteTypeSelect.disabled = true;
-      wasteTypeSelect.style.backgroundColor = '#f1f5f9';
-      wasteTypeSelect.style.cursor = 'not-allowed';
-      if (changeLink) changeLink.style.display = 'inline-block';
-    }
-
-    enableSubmitBtn();
-
-  } catch (err) {
-    console.error('Classification error:', err);
-    resultBox.innerHTML = `<p>❌ Error: ${err.message}</p>`;
-    enableSubmitBtn();
   }
+
+  // Display results
+  resultBox.innerHTML = `
+    <div class="ai-result-card ${verdictClass}">
+      <div style="text-align:center; margin-bottom:12px;">
+        <div style="font-size:48px; margin-bottom:8px;">
+          ${verdictClass === 'compostable' ? '✅' : verdictClass === 'non-compostable' ? '🚫' : '♻️'}
+        </div>
+        <p style="font-size:18px; font-weight:700; margin:0;">${verdict}</p>
+        <p style="color:#6b7280; font-size:14px; margin:4px 0 0 0;">Confidence: ${(confidence * 100).toFixed(0)}%</p>
+      </div>
+      
+      <img src="${imageUrl}" style="width:100%; max-width:250px; border-radius:8px; margin:12px auto; display:block; border:2px solid #e5e7eb;"/>
+      
+      <details style="margin-top:12px; font-size:12px; color:#6b7280;">
+        <summary style="cursor:pointer; font-weight:600;">🔍 AI Predictions (Top 5)</summary>
+        <div style="margin-top:8px; padding:8px; background:#f9fafb; border-radius:4px;">
+          ${topk.slice(0, 5).map((p, i) => `
+            <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid #e5e7eb;">
+              <span>${i + 1}. ${p.className}</span>
+              <span style="font-weight:600; color:#059669;">${(p.probability * 100).toFixed(1)}%</span>
+            </div>
+          `).join('')}
+        </div>
+      </details>
+      
+      <details style="margin-top:8px; font-size:11px; color:#9ca3af;">
+        <summary style="cursor:pointer;">🔧 Debug Info</summary>
+        <div style="margin-top:4px; padding:6px; background:#f3f4f6; border-radius:4px; font-family:monospace;">
+          Backend: ${tf.getBackend()}<br>
+          Platform: ${navigator.platform}<br>
+          Device: ${/mobile/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop'}<br>
+          File: ${fileName}
+        </div>
+      </details>
+    </div>
+  `;
+
+  // Auto-fill waste type
+  const wasteTypeSelect = document.querySelector('select[name="wasteType"]');
+  if (wasteTypeSelect && verdict === 'Compostable') {
+    wasteTypeSelect.value = 'mixed-organic';
+  }
+
+  enableSubmitBtn();
 }
 
 function enableSubmitBtn() {
@@ -399,40 +394,12 @@ function enableSubmitBtn() {
   if (submitBtn) {
     submitBtn.disabled = false;
     submitBtn.textContent = 'Schedule Pickup';
+    submitBtn.style.background = '#00A63E';
   }
 }
 
-// ✅ NEW: Manual Rotation Function
-window.rotateAndRetry = function () {
-  const imgInfo = document.getElementById('analyzedImage');
-  if (!imgInfo) return;
-
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  const img = new Image();
-  img.onload = () => {
-    // Rotate 90 degrees clockwise
-    canvas.width = img.height;
-    canvas.height = img.width;
-    ctx.translate(canvas.width / 2, canvas.height / 2);
-    ctx.rotate(90 * Math.PI / 180);
-    ctx.drawImage(img, -img.width / 2, -img.height / 2);
-
-    const newSrc = canvas.toDataURL();
-    const newImg = document.createElement('img');
-    newImg.src = newSrc;
-    newImg.onload = () => runClassification(newImg, 'Manual-Rotated');
-  };
-  img.src = imgInfo.src;
-
-  // Update UI to show processing
-  const btn = document.querySelector('#pickupForm button[type="submit"]');
-  if (btn) { btn.textContent = 'Rotating...'; btn.disabled = true; }
-};
-
-// ✅ EXPOSE FLAG GLOBALLY
+// Expose globally
 window.isWasteOrganic = () => isWasteOrganic;
 window.isModelLoaded = () => modelLoaded;
 window.isModelLoading = () => !!modelLoadingPromise;
 window.loadModel = loadModel;
-window.classifiyFile = classifyFile; // Typo fix in case used externally, but keep safe
