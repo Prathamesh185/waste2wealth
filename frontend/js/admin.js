@@ -1577,7 +1577,7 @@ async function optimizeCurrentRoute() {
     } else {
       console.warn('⚠️ Optimization method used: fallback');
       console.warn('Check backend console for Gemini API errors.');
-      showToast('Route optimized using 🔧 Fallback algorithm (Gemini failed)');
+      showToast('Route optimized using 🔧 Fallback algorithm');
     }
 
   } catch (error) {

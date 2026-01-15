@@ -11,45 +11,32 @@ async function loadModel() {
     try {
       console.log('⏳ Loading MobileNet...');
 
-      // ✅ FORCE SPECIFIC MODEL VERSION AND BACKEND
-      await tf.setBackend('webgl'); // Force WebGL backend
-      await tf.ready();
+      // Force WebGL backend with fallback
+      try {
+        await tf.setBackend('webgl');
+        await tf.ready();
+        console.log('✅ WebGL backend loaded');
+      } catch (e) {
+        console.warn('⚠️ WebGL failed, using CPU');
+        await tf.setBackend('cpu');
+        await tf.ready();
+      }
 
       console.log('🔧 TensorFlow backend:', tf.getBackend());
-      console.log('📱 Device info:', navigator.userAgent);
 
-      // Load MobileNet v2 (more consistent across devices)
       mobilenetModel = await mobilenet.load({
         version: 2,
-        alpha: 1.0 // Full precision
+        alpha: 1.0
       });
 
       modelLoaded = true;
-      console.log('✅ MobileNet loaded successfully');
+      console.log('✅ MobileNet v2 loaded');
       showToast('AI model ready', 'success');
     } catch (err) {
-      console.error('❌ Error loading MobileNet:', err);
-
-      // Fallback to CPU backend
-      try {
-        console.log('⚠️ Trying CPU backend...');
-        await tf.setBackend('cpu');
-        await tf.ready();
-
-        mobilenetModel = await mobilenet.load({
-          version: 2,
-          alpha: 1.0
-        });
-
-        modelLoaded = true;
-        console.log('✅ MobileNet loaded (CPU mode)');
-        showToast('AI model ready (CPU mode)', 'success');
-      } catch (fallbackErr) {
-        console.error('❌ Failed to load model:', fallbackErr);
-        showToast('AI model failed to load', 'error');
-        modelLoadingPromise = null;
-        throw fallbackErr;
-      }
+      console.error('❌ Model load error:', err);
+      showToast('AI model failed to load', 'error');
+      modelLoadingPromise = null;
+      throw err;
     }
   })();
 
@@ -64,91 +51,130 @@ async function onClassifyClick() {
   await classifyFile(input.files[0]);
 }
 
-// ✅ NORMALIZE IMAGE TO EXACT SAME FORMAT
-async function normalizeImage(file) {
+// ✅ FIX: Robust image loading with format conversion
+async function loadImageRobustly(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
-    reader.onload = (e) => {
-      const img = new Image();
+    reader.onload = async (e) => {
+      try {
+        const arrayBuffer = e.target.result;
 
-      img.onload = () => {
-        console.log('📐 Original image:', {
-          width: img.width,
-          height: img.height,
-          naturalWidth: img.naturalWidth,
-          naturalHeight: img.naturalHeight
+        console.log('📥 File loaded:', {
+          name: file.name,
+          type: file.type,
+          size: `${(file.size / 1024).toFixed(2)} KB`
         });
 
-        // ✅ CREATE STANDARDIZED 224x224 IMAGE
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d', {
-          alpha: false,
-          willReadFrequently: false
-        });
+        // ✅ Create blob with explicit JPEG type
+        const blob = new Blob([arrayBuffer], { type: 'image/jpeg' });
+        const url = URL.createObjectURL(blob);
 
-        // MobileNet expects 224x224
-        canvas.width = 224;
-        canvas.height = 224;
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
 
-        // Calculate scaling to maintain aspect ratio
-        const scale = Math.max(224 / img.width, 224 / img.height);
-        const scaledWidth = img.width * scale;
-        const scaledHeight = img.height * scale;
+        // Set timeout for loading
+        const timeout = setTimeout(() => {
+          URL.revokeObjectURL(url);
+          reject(new Error('Image load timeout'));
+        }, 10000);
 
-        // Center crop
-        const x = (224 - scaledWidth) / 2;
-        const y = (224 - scaledHeight) / 2;
+        img.onload = () => {
+          clearTimeout(timeout);
 
-        // Fill with white background
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, 224, 224);
+          console.log('✅ Image loaded:', {
+            width: img.naturalWidth,
+            height: img.naturalHeight,
+            complete: img.complete
+          });
 
-        // Draw image
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-        ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+          // Validate image actually loaded
+          if (img.naturalWidth === 0 || img.naturalHeight === 0) {
+            URL.revokeObjectURL(url);
+            reject(new Error('Image has zero dimensions'));
+            return;
+          }
 
-        // ✅ NORMALIZE PIXEL VALUES (critical for consistency)
-        const imageData = ctx.getImageData(0, 0, 224, 224);
-        const data = imageData.data;
+          URL.revokeObjectURL(url);
+          resolve(img);
+        };
 
-        // Apply standard normalization (-1 to 1 range)
-        for (let i = 0; i < data.length; i += 4) {
-          // Normalize RGB values to [-1, 1] range
-          data[i] = (data[i] / 127.5) - 1;     // R
-          data[i + 1] = (data[i + 1] / 127.5) - 1; // G
-          data[i + 2] = (data[i + 2] / 127.5) - 1; // B
-          // Keep alpha as is
-        }
+        img.onerror = (err) => {
+          clearTimeout(timeout);
+          URL.revokeObjectURL(url);
+          console.error('❌ Image load error:', err);
+          reject(new Error('Failed to load image'));
+        };
 
-        // Convert back to [0, 255] for display
-        const displayData = new Uint8ClampedArray(data.length);
-        for (let i = 0; i < data.length; i += 4) {
-          displayData[i] = (data[i] + 1) * 127.5;
-          displayData[i + 1] = (data[i + 1] + 1) * 127.5;
-          displayData[i + 2] = (data[i + 2] + 1) * 127.5;
-          displayData[i + 3] = data[i + 3];
-        }
+        img.src = url;
 
-        const displayImageData = new ImageData(displayData, 224, 224);
-        const displayCanvas = document.createElement('canvas');
-        displayCanvas.width = 224;
-        displayCanvas.height = 224;
-        displayCanvas.getContext('2d').putImageData(displayImageData, 0, 0);
-
-        resolve({
-          canvas: canvas,
-          displayUrl: displayCanvas.toDataURL('image/jpeg', 1.0)
-        });
-      };
-
-      img.onerror = () => reject(new Error('Failed to load image'));
-      img.src = e.target.result;
+      } catch (err) {
+        reject(err);
+      }
     };
 
-    reader.onerror = () => reject(new Error('Failed to read file'));
-    reader.readAsDataURL(file);
+    reader.onerror = () => {
+      reject(new Error('Failed to read file'));
+    };
+
+    // ✅ Read as ArrayBuffer to handle any format
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+// ✅ Convert to standard format and size
+async function normalizeImage(img) {
+  return new Promise((resolve, reject) => {
+    try {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d', {
+        alpha: false,
+        willReadFrequently: false
+      });
+
+      // MobileNet expects 224x224
+      const targetSize = 224;
+      canvas.width = targetSize;
+      canvas.height = targetSize;
+
+      // Fill white background
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, targetSize, targetSize);
+
+      // Calculate scaling to fill canvas while maintaining aspect ratio
+      const scale = Math.max(
+        targetSize / img.naturalWidth,
+        targetSize / img.naturalHeight
+      );
+
+      const scaledWidth = img.naturalWidth * scale;
+      const scaledHeight = img.naturalHeight * scale;
+
+      // Center the image
+      const x = (targetSize - scaledWidth) / 2;
+      const y = (targetSize - scaledHeight) / 2;
+
+      // High quality rendering
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+
+      // Draw image
+      ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+
+      console.log('🎨 Image normalized to 224x224');
+
+      // Get display URL
+      const displayUrl = canvas.toDataURL('image/jpeg', 0.95);
+
+      resolve({
+        canvas: canvas,
+        displayUrl: displayUrl
+      });
+
+    } catch (err) {
+      console.error('❌ Normalization error:', err);
+      reject(err);
+    }
   });
 }
 
@@ -168,30 +194,77 @@ async function classifyFile(file) {
   }
 
   try {
-    console.log('📸 Normalizing image...');
-    const normalized = await normalizeImage(file);
+    // ✅ STEP 1: Load image robustly
+    console.log('📸 Loading image...');
+    const img = await loadImageRobustly(file);
 
-    console.log('🤖 Classifying with MobileNet...');
-    console.log('🔧 TensorFlow backend:', tf.getBackend());
+    // ✅ STEP 2: Normalize to 224x224
+    console.log('🎨 Normalizing image...');
+    const normalized = await normalizeImage(img);
 
-    // ✅ CLASSIFY USING CANVAS DIRECTLY
+    // ✅ STEP 3: Verify canvas has content
+    const ctx = normalized.canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, 224, 224);
+    const pixels = imageData.data;
+
+    // Check if canvas is not blank
+    let hasContent = false;
+    for (let i = 0; i < pixels.length; i += 4) {
+      if (pixels[i] !== 255 || pixels[i + 1] !== 255 || pixels[i + 2] !== 255) {
+        hasContent = true;
+        break;
+      }
+    }
+
+    if (!hasContent) {
+      throw new Error('Image appears blank after processing');
+    }
+
+    console.log('✅ Image has valid content');
+
+    // ✅ STEP 4: Classify
+    resultBox.innerHTML = '🤖 Analyzing with AI...';
+    console.log('🤖 Running classification...');
+    console.log('🔧 Backend:', tf.getBackend());
+
     const predictions = await mobilenetModel.classify(normalized.canvas, 15);
 
     console.log('🔍 Raw predictions:', predictions);
 
-    // Log device info for debugging
-    console.log('📱 Classification context:', {
-      userAgent: navigator.userAgent.substring(0, 100),
-      backend: tf.getBackend(),
-      platform: navigator.platform,
-      screenSize: `${window.screen.width}x${window.screen.height}`
-    });
+    // ✅ Validate predictions
+    if (!predictions || predictions.length === 0) {
+      throw new Error('No predictions returned');
+    }
+
+    // Check if all predictions are 0% (indicates failure)
+    const allZero = predictions.every(p => p.probability < 0.001);
+    if (allZero) {
+      throw new Error('Model returned all zero probabilities - image may not be processed correctly');
+    }
+
+    console.log('✅ Valid predictions received');
 
     await analyzeAndDisplay(predictions, normalized.displayUrl, file.name);
 
   } catch (err) {
     console.error('❌ Classification error:', err);
-    resultBox.innerHTML = `<p>❌ Error: ${err.message}</p>`;
+
+    resultBox.innerHTML = `
+      <div class="ai-result-card unknown" style="border:2px solid #dc2626;">
+        <p style="color:#dc2626;font-weight:700;">❌ Classification Failed</p>
+        <p style="font-size:14px;color:#6b7280;">${err.message}</p>
+        <div style="background:#fee2e2;padding:12px;border-radius:8px;margin-top:12px;">
+          <p style="margin:0;font-size:13px;color:#991b1b;">
+            <strong>Troubleshooting:</strong><br>
+            • Try a different image format (JPG/PNG)<br>
+            • Ensure good internet connection<br>
+            • Try reloading the page<br>
+            • Use a different browser if issue persists
+          </p>
+        </div>
+      </div>
+    `;
+
     enableSubmitBtn();
   }
 }
@@ -199,7 +272,7 @@ async function classifyFile(file) {
 async function analyzeAndDisplay(predictions, imageUrl, fileName) {
   const resultBox = document.getElementById('aiResult');
 
-  // Enhanced keywords
+  // Keywords
   const compostKeywords = [
     'banana', 'apple', 'orange', 'lemon', 'mango', 'pear', 'pineapple',
     'strawberry', 'grapes', 'watermelon', 'peach', 'plum', 'kiwi',
@@ -208,8 +281,9 @@ async function analyzeAndDisplay(predictions, imageUrl, fileName) {
     'squash', 'zucchini', 'eggplant', 'pumpkin', 'corn', 'mushroom',
     'food', 'salad', 'pizza', 'sandwich', 'bread', 'rice', 'pasta',
     'soup', 'meal', 'dish', 'plate', 'bowl', 'bagel', 'pretzel',
+    'grocery', 'market', 'produce', 'fruit', 'bean', 'seed',
     'leaf', 'leaves', 'plant', 'flower', 'grass', 'twig', 'bark',
-    'peel', 'shell', 'seed', 'nut', 'egg', 'coffee', 'tea', 'bean'
+    'peel', 'shell', 'nut', 'egg', 'coffee', 'tea'
   ];
 
   const nonCompostKeywords = [
@@ -219,7 +293,8 @@ async function analyzeAndDisplay(predictions, imageUrl, fileName) {
     'phone', 'remote', 'toy', 'tool', 'utensil', 'cup', 'mug',
     'fork', 'spoon', 'knife', 'screwdriver', 'hammer',
     'tire', 'wheel', 'battery', 'cable', 'wire',
-    'pin', 'safety pin', 'clip', 'buckle', 'diaper'
+    'pin', 'safety', 'clip', 'buckle', 'diaper',
+    'fish', 'shark', 'tench', 'goldfish' // ✅ Added fish keywords
   ];
 
   const recycleKeywords = [
@@ -227,22 +302,24 @@ async function analyzeAndDisplay(predictions, imageUrl, fileName) {
     'box', 'carton', 'envelope', 'notebook'
   ];
 
-  // ✅ FILTER FALSE POSITIVES FIRST
+  // Filter out obvious false positives
   const filteredPredictions = predictions.filter(pred => {
     const label = pred.className.toLowerCase();
 
-    // Exclude obvious false positives
-    const falsePositives = ['safety pin', 'diaper', 'buckle', 'ballpoint'];
+    const falsePositives = [
+      'safety pin', 'diaper', 'buckle', 'ballpoint',
+      'tench', 'goldfish', 'shark', 'fish', 'stingray'
+    ];
+
     if (falsePositives.some(fp => label.includes(fp))) {
-      console.log(`🚫 Filtered out false positive: ${pred.className} (${(pred.probability * 100).toFixed(1)}%)`);
+      console.log(`🚫 Filtered: ${pred.className}`);
       return false;
     }
     return true;
   });
 
   const topk = filteredPredictions.slice(0, 10);
-
-  console.log('✅ Filtered predictions:', topk.map(p => `${p.className} (${(p.probability * 100).toFixed(1)}%)`));
+  console.log('✅ Top predictions:', topk.map(p => `${p.className} (${(p.probability * 100).toFixed(1)}%)`));
 
   let score = { compost: 0, non: 0, recycle: 0 };
 
@@ -258,42 +335,24 @@ async function analyzeAndDisplay(predictions, imageUrl, fileName) {
     const hasRecycle = recycleKeywords.some(k => clean.includes(k));
 
     if (hasCompost) {
-      score.compost += weightedScore * 3; // Higher boost
-      console.log(`  ✅ Compost match: ${pred.className} (+${(weightedScore * 3).toFixed(3)})`);
+      score.compost += weightedScore * 3;
+      console.log(`  ✅ Compost: ${pred.className} (+${(weightedScore * 3).toFixed(3)})`);
     }
     if (hasNon) {
       score.non += weightedScore * 2;
-      console.log(`  ❌ Non-compost match: ${pred.className} (+${(weightedScore * 2).toFixed(3)})`);
     }
     if (hasRecycle) {
       score.recycle += weightedScore * 1.5;
     }
 
     // Pattern matching
-    const organicPatterns = [
-      /fruit|vegetable|veg|food|produce|plant|leaf|peel|bean/,
-      /banana|apple|orange|potato|tomato|carrot|bagel|bread/,
-      /salad|meal|dish|leftover|scrap|compost/
-    ];
-
-    const nonOrganicPatterns = [
-      /bottle|can|plastic|metal|package|wrapper/,
-      /phone|remote|tool|device|electronic/,
-      /pin|safety|buckle|clip|diaper/
-    ];
-
-    organicPatterns.forEach(pattern => {
-      if (pattern.test(clean)) {
-        score.compost += weightedScore * 2;
-        console.log(`  🌱 Organic pattern: ${pred.className} (+${(weightedScore * 2).toFixed(3)})`);
-      }
-    });
-
-    nonOrganicPatterns.forEach(pattern => {
-      if (pattern.test(clean)) {
-        score.non += weightedScore * 2;
-      }
-    });
+    if (/fruit|vegetable|food|produce|grocery|market|bean|seed/.test(clean)) {
+      score.compost += weightedScore * 2;
+      console.log(`  🌱 Pattern: ${pred.className} (+${(weightedScore * 2).toFixed(3)})`);
+    }
+    if (/bottle|plastic|metal|fish|shark/.test(clean)) {
+      score.non += weightedScore * 2;
+    }
   });
 
   console.log('📊 Final scores:', score);
@@ -303,15 +362,13 @@ async function analyzeAndDisplay(predictions, imageUrl, fileName) {
   const totalScore = score.compost + score.non + score.recycle;
   const confidence = totalScore > 0 ? (topScore / totalScore) : 0;
 
-  console.log(`🎯 Winner: ${topCategory} (confidence: ${(confidence * 100).toFixed(1)}%)`);
-
-  const CONFIDENCE_THRESHOLD = 0.45;
+  console.log(`🎯 Result: ${topCategory} (${(confidence * 100).toFixed(1)}%)`);
 
   let verdict = 'Unknown';
   let message = '🤔 Not sure – try a clearer photo';
   let verdictClass = 'unknown';
 
-  if (confidence >= CONFIDENCE_THRESHOLD) {
+  if (confidence >= 0.40) {
     if (topCategory === 'compost') {
       verdict = 'Compostable';
       message = '✅ Compostable – add to your green bin!';
@@ -324,63 +381,60 @@ async function analyzeAndDisplay(predictions, imageUrl, fileName) {
       isWasteOrganic = false;
     } else if (topCategory === 'recycle') {
       verdict = 'Recyclable';
-      message = '♻️ Recyclable – send to recycling';
+      message = '♻️ Recyclable';
       verdictClass = 'recyclable';
       isWasteOrganic = false;
     }
   } else {
-    // Check top prediction
+    // Fallback to top prediction
     const topPred = topk[0];
-    if (topPred && topPred.probability > 0.30) {
+    if (topPred && topPred.probability > 0.25) {
       const topLabel = topPred.className.toLowerCase();
-      if (/banana|apple|orange|broccoli|strawberry|lemon|mushroom|bagel|pretzel|bean/.test(topLabel)) {
+      if (/banana|apple|orange|cucumber|strawberry|mushroom|grocery|market/.test(topLabel)) {
         verdict = 'Compostable';
-        message = '✅ Compostable – add to your green bin!';
+        message = '✅ Compostable';
         verdictClass = 'compostable';
         isWasteOrganic = true;
-        console.log(`✅ Low confidence override: ${topPred.className} detected as compostable`);
       }
     }
   }
 
-  // Display results
+  // Display
   resultBox.innerHTML = `
     <div class="ai-result-card ${verdictClass}">
       <div style="text-align:center; margin-bottom:12px;">
-        <div style="font-size:48px; margin-bottom:8px;">
-          ${verdictClass === 'compostable' ? '✅' : verdictClass === 'non-compostable' ? '🚫' : '♻️'}
-        </div>
-        <p style="font-size:18px; font-weight:700; margin:0;">${verdict}</p>
-        <p style="color:#6b7280; font-size:14px; margin:4px 0 0 0;">Confidence: ${(confidence * 100).toFixed(0)}%</p>
+        <div style="font-size:48px;">${verdictClass === 'compostable' ? '✅' : '🚫'}</div>
+        <p style="font-size:20px; font-weight:700; margin:4px 0;">${verdict}</p>
+        <p style="color:#6b7280; font-size:14px;">Confidence: ${(confidence * 100).toFixed(0)}%</p>
       </div>
       
-      <img src="${imageUrl}" style="width:100%; max-width:250px; border-radius:8px; margin:12px auto; display:block; border:2px solid #e5e7eb;"/>
+      <img src="${imageUrl}" style="width:224px; height:224px; border-radius:8px; margin:12px auto; display:block; border:2px solid #e5e7eb;"/>
       
-      <details style="margin-top:12px; font-size:12px; color:#6b7280;">
+      <details style="margin-top:12px; font-size:12px;">
         <summary style="cursor:pointer; font-weight:600;">🔍 AI Predictions (Top 5)</summary>
         <div style="margin-top:8px; padding:8px; background:#f9fafb; border-radius:4px;">
           ${topk.slice(0, 5).map((p, i) => `
-            <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid #e5e7eb;">
+            <div style="display:flex; justify-content:space-between; padding:4px 0;">
               <span>${i + 1}. ${p.className}</span>
-              <span style="font-weight:600; color:#059669;">${(p.probability * 100).toFixed(1)}%</span>
+              <span style="font-weight:600;">${(p.probability * 100).toFixed(1)}%</span>
             </div>
           `).join('')}
         </div>
       </details>
       
       <details style="margin-top:8px; font-size:11px; color:#9ca3af;">
-        <summary style="cursor:pointer;">🔧 Debug Info</summary>
-        <div style="margin-top:4px; padding:6px; background:#f3f4f6; border-radius:4px; font-family:monospace;">
+        <summary style="cursor:pointer;">🔧 Debug</summary>
+        <div style="margin-top:4px; padding:6px; background:#f3f4f6; border-radius:4px; font-family:monospace; font-size:10px;">
           Backend: ${tf.getBackend()}<br>
           Platform: ${navigator.platform}<br>
           Device: ${/mobile/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop'}<br>
-          File: ${fileName}
+          File: ${fileName}<br>
+          Scores: C:${score.compost.toFixed(2)} N:${score.non.toFixed(2)} R:${score.recycle.toFixed(2)}
         </div>
       </details>
     </div>
   `;
 
-  // Auto-fill waste type
   const wasteTypeSelect = document.querySelector('select[name="wasteType"]');
   if (wasteTypeSelect && verdict === 'Compostable') {
     wasteTypeSelect.value = 'mixed-organic';
@@ -398,7 +452,6 @@ function enableSubmitBtn() {
   }
 }
 
-// Expose globally
 window.isWasteOrganic = () => isWasteOrganic;
 window.isModelLoaded = () => modelLoaded;
 window.isModelLoading = () => !!modelLoadingPromise;
