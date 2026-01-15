@@ -38,36 +38,49 @@ function getOrientation(file) {
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (e) => {
-      const view = new DataView(e.target.result);
-      if (view.getUint16(0, false) !== 0xFFD8) {
-        return resolve(-2); // Not a JPEG
-      }
-      const length = view.byteLength;
-      let offset = 2;
-      while (offset < length) {
-        if (view.getUint16(offset + 2, false) <= 8) return resolve(-1);
-        const marker = view.getUint16(offset, false);
-        offset += 2;
-        if (marker === 0xFFE1) {
-          if (view.getUint32(offset += 2, false) !== 0x45786966) {
-            return resolve(-1);
-          }
-          const little = view.getUint16(offset += 6, false) === 0x4949;
-          offset += view.getUint32(offset + 4, little);
-          const tags = view.getUint16(offset, little);
-          offset += 2;
-          for (let i = 0; i < tags; i++) {
-            if (view.getUint16(offset + (i * 12), little) === 0x0112) {
-              return resolve(view.getUint16(offset + (i * 12) + 8, little));
-            }
-          }
-        } else if ((marker & 0xFF00) !== 0xFF00) {
-          break;
-        } else {
-          offset += view.getUint16(offset, false);
+      try {
+        const view = new DataView(e.target.result);
+        if (view.byteLength < 2 || view.getUint16(0, false) !== 0xFFD8) {
+          return resolve(-2); // Not a JPEG
         }
+        const length = view.byteLength;
+        let offset = 2;
+        while (offset < length) {
+          if (offset + 4 > length) return resolve(-1); // Prevent out of bounds
+          if (view.getUint16(offset + 2, false) <= 8) return resolve(-1);
+          const marker = view.getUint16(offset, false);
+          offset += 2;
+          if (marker === 0xFFE1) {
+            if (offset + 10 > length) return resolve(-1);
+            if (view.getUint32(offset += 2, false) !== 0x45786966) {
+              return resolve(-1);
+            }
+            const little = view.getUint16(offset += 6, false) === 0x4949;
+            offset += view.getUint32(offset + 4, little);
+            if (offset + 2 > length) return resolve(-1);
+            const tags = view.getUint16(offset, little);
+            offset += 2;
+            for (let i = 0; i < tags; i++) {
+              if (offset + (i * 12) + 12 > length) return resolve(-1);
+              if (view.getUint16(offset + (i * 12), little) === 0x0112) {
+                return resolve(view.getUint16(offset + (i * 12) + 8, little));
+              }
+            }
+          } else if ((marker & 0xFF00) !== 0xFF00) {
+            break;
+          } else {
+            offset += view.getUint16(offset, false);
+          }
+        }
+        return resolve(-1);
+      } catch (err) {
+        console.warn('Error reading EXIF:', err);
+        return resolve(-1);
       }
-      return resolve(-1);
+    };
+    reader.onerror = () => {
+      console.warn('FileReader error');
+      resolve(-1);
     };
     reader.readAsArrayBuffer(file);
   });
@@ -125,10 +138,10 @@ async function processImage(file) {
         // Fix orientation if needed
         if (orientation > 1) {
           resetOrientation(originalImage, orientation, (correctedImage) => {
-            resolve(correctedImage);
+            resolve({ src: correctedImage, orientation: orientation });
           });
         } else {
-          resolve(originalImage);
+          resolve({ src: originalImage, orientation: orientation });
         }
       };
       reader.onerror = reject;
@@ -188,7 +201,9 @@ async function classifyFile(file) {
   try {
     // ✅ STEP 1: Process image (fix orientation)
     console.log('📸 Processing image...');
-    const processedImageSrc = await processImage(file);
+    const processed = await processImage(file);
+    const processedImageSrc = processed.src;
+    const orientation = processed.orientation;
 
     // ✅ STEP 2: Resize for consistent analysis
     console.log('📏 Resizing image...');
@@ -197,15 +212,27 @@ async function classifyFile(file) {
     // ✅ STEP 3: Create image element for classification
     const img = document.createElement('img');
     img.src = resizedImageSrc;
-    await img.decode();
+    img.onload = () => runClassification(img, orientation);
 
-    resultBox.innerHTML = '🤖 Analyzing with AI...';
+  } catch (err) {
+    console.error('❌ AI classify error:', err);
+    resultBox.innerHTML = `<p>❌ Error analyzing image: ${err.message || 'Unknown error'}</p>`;
+    enableSubmitBtn();
+  }
+}
 
-    // ✅ STEP 4: Classify
-    const predictions = await mobilenetModel.classify(img, 10);
+// ✅ NEW: Decoupled classification logic for re-use
+async function runClassification(imgElement, orientationStr) {
+  const resultBox = document.getElementById('aiResult');
+  const submitBtn = document.querySelector('#pickupForm button[type="submit"]');
+
+  resultBox.innerHTML = '🤖 Analyzing with AI...';
+
+  try {
+    const predictions = await mobilenetModel.classify(imgElement, 10);
     console.log('🔍 MobileNet predictions:', predictions);
 
-    // Rest of your classification logic...
+    // ... (Keywords definitions: compostKeywords, etc. - kept same for brevity) ...
     const compostKeywords = [
       'banana', 'apple', 'orange', 'lemon', 'mango', 'pear', 'pineapple',
       'strawberry', 'grapes', 'watermelon', 'peach', 'plum', 'kiwi',
@@ -224,7 +251,7 @@ async function classifyFile(file) {
       'can', 'metal', 'glass', 'jar', 'aluminum', 'steel', 'tin',
       'phone', 'remote', 'toy', 'tool', 'utensil', 'cup', 'mug',
       'plate', 'fork', 'spoon', 'knife', 'screwdriver', 'hammer',
-      'tire', 'wheel', 'battery', 'cable', 'wire'
+      'tire', 'wheel', 'battery', 'cable', 'wire', 'pin', 'needle'
     ];
 
     const recycleKeywords = [
@@ -232,6 +259,7 @@ async function classifyFile(file) {
       'box', 'carton', 'envelope', 'notebook'
     ];
 
+    // Scoring logic (kept same)
     let score = { compost: 0, non: 0, recycle: 0 };
     const topk = predictions.slice(0, 10);
 
@@ -260,7 +288,8 @@ async function classifyFile(file) {
       const nonOrganicPatterns = [
         /bottle|can|plastic|glass|metal|package|wrapper/,
         /phone|remote|toy|tool|device|electronic/,
-        /container|cup|jar|utensil|fork|spoon|knife/
+        /container|cup|jar|utensil|fork|spoon|knife/,
+        /pin|safety|needle/
       ];
 
       organicPatterns.forEach(pattern => {
@@ -272,13 +301,10 @@ async function classifyFile(file) {
       });
     });
 
-    console.log('📊 Weighted scores:', score);
-
     const topCategory = Object.keys(score).reduce((a, b) => score[a] > score[b] ? a : b);
     const topScore = score[topCategory];
     const totalScore = score.compost + score.non + score.recycle;
     const confidence = totalScore > 0 ? (topScore / totalScore) : 0;
-
     const CONFIDENCE_THRESHOLD = 0.55;
 
     let verdict = 'Unknown';
@@ -303,8 +329,9 @@ async function classifyFile(file) {
         isWasteOrganic = false;
       }
     } else {
+      // Low confidence fallback (check top prediction)
       const topPred = topk[0];
-      if (topPred.probability > 0.5) {
+      if (topPred.probability > 0.4) {
         const topLabel = topPred.className.toLowerCase();
         if (/banana|apple|orange|broccoli|strawberry|lemon|mushroom/.test(topLabel)) {
           verdict = 'Compostable';
@@ -315,12 +342,12 @@ async function classifyFile(file) {
       }
     }
 
-    // Display results with processed image
+    // UI Updates
     const debugInfo = `
       <div style="font-size:11px; color:#6b7280; margin-top:12px; padding:8px; background:#f9fafb; border-radius:6px; text-align:left; border:1px solid #e5e7eb;">
         <div style="margin-bottom:4px; font-weight:600;">Debug Info (Mobile):</div>
         <div>Model Verdict: ${verdict}</div>
-        <div>Orientation: ${orientation}</div>
+        <div>Orientation: ${orientationStr} (Dims: ${imgElement.width}x${imgElement.height})</div>
         <div style="margin-top:4px; font-weight:600;">Top Predictions:</div>
         ${topk.slice(0, 3).map(p => `
           <div style="display:flex; justify-content:space-between;">
@@ -336,57 +363,76 @@ async function classifyFile(file) {
         <p><strong>Verdict:</strong> ${verdict}</p>
         <p>${message}</p>
         <p class="muted">Confidence: ${(confidence * 100).toFixed(0)}%</p>
-        <img src="${resizedImageSrc}" width="220" style="margin-top:8px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1);"/>
+        <div style="position:relative; display:inline-block;">
+             <img id="analyzedImage" src="${imgElement.src}" width="220" style="margin-top:8px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1);"/>
+             <button onclick="rotateAndRetry()" style="position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.6); color:white; border:none; border-radius:4px; padding:4px 8px; cursor:pointer; font-size:12px;">↻ Rotate</button>
+        </div>
         ${debugInfo}
       </div>
     `;
 
-    // ✅ AUTO-FILL LOGIC (Does NOT block submission)
+    // Auto-fill logic
     const wasteTypeSelect = document.getElementById('wasteType');
     const changeLink = document.getElementById('changeCategoryLink');
-
     if (wasteTypeSelect) {
-      if (verdict === 'Compostable') {
-        wasteTypeSelect.value = 'mixed-organic';
-      } else if (verdict === 'Recyclable') {
-        wasteTypeSelect.value = 'recyclable';
-      } else if (verdict === 'Non-compostable') {
-        wasteTypeSelect.value = 'non-organic';
-      }
+      if (verdict === 'Compostable') { wasteTypeSelect.value = 'mixed-organic'; }
+      else if (verdict === 'Recyclable') { wasteTypeSelect.value = 'recyclable'; }
+      else if (verdict === 'Non-compostable') { wasteTypeSelect.value = 'non-organic'; }
 
-      // ✅ Lock the dropdown and show "Change category"
       wasteTypeSelect.disabled = true;
-      wasteTypeSelect.style.backgroundColor = '#f1f5f9'; // Visual cue for disabled state
+      wasteTypeSelect.style.backgroundColor = '#f1f5f9';
       wasteTypeSelect.style.cursor = 'not-allowed';
-      if (changeLink) {
-        changeLink.style.display = 'inline-block';
-      }
+      if (changeLink) changeLink.style.display = 'inline-block';
     }
 
-    // ✅ Enable button and show success toast (Never disable)
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Schedule Pickup'; // Reset text
-      // submitBtn.style.background = 'var(--primary-green)'; // Let CSS handle color or set if needed
-      showToast(`Auto-selected: ${verdict}`, 'success');
-    }
+    enableSubmitBtn();
 
   } catch (err) {
-    console.error('❌ AI classify error:', err);
-    resultBox.innerHTML = '<p>❌ Error analyzing image</p>';
-
-    // ✅ Ensure button is enabled even on error
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Schedule Pickup';
-    }
+    console.error('Classification error:', err);
+    resultBox.innerHTML = `<p>❌ Error: ${err.message}</p>`;
+    enableSubmitBtn();
   }
 }
 
+function enableSubmitBtn() {
+  const submitBtn = document.querySelector('#pickupForm button[type="submit"]');
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Schedule Pickup';
+  }
+}
 
+// ✅ NEW: Manual Rotation Function
+window.rotateAndRetry = function () {
+  const imgInfo = document.getElementById('analyzedImage');
+  if (!imgInfo) return;
+
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const img = new Image();
+  img.onload = () => {
+    // Rotate 90 degrees clockwise
+    canvas.width = img.height;
+    canvas.height = img.width;
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate(90 * Math.PI / 180);
+    ctx.drawImage(img, -img.width / 2, -img.height / 2);
+
+    const newSrc = canvas.toDataURL();
+    const newImg = document.createElement('img');
+    newImg.src = newSrc;
+    newImg.onload = () => runClassification(newImg, 'Manual-Rotated');
+  };
+  img.src = imgInfo.src;
+
+  // Update UI to show processing
+  const btn = document.querySelector('#pickupForm button[type="submit"]');
+  if (btn) { btn.textContent = 'Rotating...'; btn.disabled = true; }
+};
 
 // ✅ EXPOSE FLAG GLOBALLY
 window.isWasteOrganic = () => isWasteOrganic;
 window.isModelLoaded = () => modelLoaded;
 window.isModelLoading = () => !!modelLoadingPromise;
 window.loadModel = loadModel;
+window.classifiyFile = classifyFile; // Typo fix in case used externally, but keep safe
