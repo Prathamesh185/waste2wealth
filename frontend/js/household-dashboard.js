@@ -572,6 +572,29 @@ function setupEventListeners() {
 	});
 	const form = document.getElementById('pickupForm');
 	if (form) form.addEventListener('submit', handlePickupRequest);
+
+	// ✅ Image Preview Listener
+	const wasteImageInput = document.getElementById('wasteImage');
+	const imagePreview = document.getElementById('imagePreview');
+
+	if (wasteImageInput && imagePreview) {
+		wasteImageInput.addEventListener('change', function (e) {
+			const file = e.target.files[0];
+			if (file) {
+				const reader = new FileReader();
+
+				reader.onload = function (e) {
+					imagePreview.src = e.target.result;
+					imagePreview.style.display = 'block';
+				}
+
+				reader.readAsDataURL(file);
+			} else {
+				imagePreview.style.display = 'none';
+				imagePreview.src = '';
+			}
+		});
+	}
 }
 
 // Boot

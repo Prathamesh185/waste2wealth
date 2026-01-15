@@ -249,6 +249,8 @@
                             <div class="form-group ai-section">
                                 <label>🤖✨ AI Waste Classifier </label>
                                 <input type="file" id="wasteImage" accept="image/*" capture="environment" />
+                                <img id="imagePreview" src="" alt="Image Preview"
+                                    style="display:none; width: 100px; height: 100px; object-fit: cover; margin-top: 10px; border-radius: 8px; border: 1px solid #ddd;" />
 
                                 <button type="button" class="btn-primary" onclick="onClassifyClick()">
                                     Classify Image
@@ -261,7 +263,8 @@
                                 <div style="display:flex; justify-content:space-between; align-items:center;">
                                     <label for="wasteType">Waste Type *</label>
                                     <a href="#" id="changeCategoryLink" onclick="enableWasteCategory(event)"
-                                        style="display:none; font-size:8px; color:var(--primary-green); text-decoration:underline;">Change</a>
+                                        style="display:none; font-size:0.65em; color:var(--primary-green); text-decoration:underline;">Change
+                                        category</a>
                                 </div>
                                 <select id="wasteType" required>
                                     <option value="">Select waste type</option>
