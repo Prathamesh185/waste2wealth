@@ -251,9 +251,10 @@ async function classifyFile(file) {
       if (hasRecycle) score.recycle += weightedScore * 1.5;
 
       const organicPatterns = [
-        /fruit|vegetable|veg|food|produce|plant|leaf|root|peel|skin|core/,
-        /banana|apple|orange|potato|tomato|onion|carrot|cabbage/,
-        /salad|meal|dish|leftover|scrap|compost/
+        /fruit|vegetable|veg|food|produce|plant|leaf|root|peel|skin|core|bean|nut|seed/,
+        /banana|apple|orange|potato|tomato|onion|carrot|cabbage|broccoli|cucumber/,
+        /salad|meal|dish|leftover|scrap|compost|bread|bakery|cake|pie/,
+        /flower|grass|weed|garden|clipping|twig/
       ];
 
       const nonOrganicPatterns = [
@@ -315,12 +316,28 @@ async function classifyFile(file) {
     }
 
     // Display results with processed image
+    const debugInfo = `
+      <div style="font-size:11px; color:#6b7280; margin-top:12px; padding:8px; background:#f9fafb; border-radius:6px; text-align:left; border:1px solid #e5e7eb;">
+        <div style="margin-bottom:4px; font-weight:600;">Debug Info (Mobile):</div>
+        <div>Model Verdict: ${verdict}</div>
+        <div>Orientation: ${orientation}</div>
+        <div style="margin-top:4px; font-weight:600;">Top Predictions:</div>
+        ${topk.slice(0, 3).map(p => `
+          <div style="display:flex; justify-content:space-between;">
+            <span>${p.className}</span>
+            <span>${(p.probability * 100).toFixed(1)}%</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+
     resultBox.innerHTML = `
       <div class="ai-result-card ${verdictClass}">
         <p><strong>Verdict:</strong> ${verdict}</p>
         <p>${message}</p>
         <p class="muted">Confidence: ${(confidence * 100).toFixed(0)}%</p>
-        <img src="${resizedImageSrc}" width="220" style="margin-top:8px;border-radius:8px"/>
+        <img src="${resizedImageSrc}" width="220" style="margin-top:8px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1);"/>
+        ${debugInfo}
       </div>
     `;
 
